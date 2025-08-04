@@ -13,15 +13,26 @@ services:
       - app-network
 
   datadock:
-    image: datadock/datadock:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
     restart: always
     ports:
-      - "80:5050"  # expose app on port 80 for production
+      - "5050:5050"  # expose app on port 80 for production
+    env_file: .env
     environment:
-      MONGODB_URI: mongodb://database:27017/DataDock
-      DATABASE_NAME: 'DataDock'
-      OPENAI_SECRET_KEY: your-openai-secret-key
-      BACKEND_SERVER_HOST: 'http://172.17.0.1'  # or use nginx reverse proxy
+      - MONGODB_URI
+      - DATABASE_NAME
+      - BACKEND_SERVER_HOST
+      - OPENAI_SECRET_KEY
+      - NEXT_PUBLIC_HIDE_AI
+      - NEXT_PUBLIC_HIDE_UPLOADER_BUTTONS
+      - NEXT_PUBLIC_HIDE_ADMIN_REGEX_AI
+      - OPENROUTER_URL
+      - OPENROUTER_API_KEY
+      - REDIS_URL
+      - NODE_ENV
+      - SESSION_SECRET
     depends_on:
       - database
     networks:
