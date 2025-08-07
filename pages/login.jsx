@@ -23,7 +23,7 @@ export default function Login() {
       const result = await login(email, password); // Use AuthProvider's login
       if (result.success) {
         console.log('Login: Redirecting to /dashboard');
-        await router.push('/dashboard'); // Redirect to dashboard
+        await router.push('/'); // Redirect to dashboard
       } else {
         setError(result.message || 'Login failed');
       }
@@ -52,7 +52,7 @@ export default function Login() {
           {/* Error message */}
           {error && (
               <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-2xl backdrop-blur-sm">
-                <p className="text-red-200 text-sm text-center">{error}</p>
+                <p className="text-black text-sm text-center">{error}</p>
               </div>
           )}
 

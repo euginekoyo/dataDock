@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 
 const SlidePanel = ({ data }) => {
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   return (
     <>
       {showSidebar ? (
         <button
-          className="flex text-4xl text-white items-center cursor-pointer fixed right-10 top-6 z-50"
+          className="flex text-4xl text-white items-center cursor-pointer fixed right-10 top-6 z-1000"
           onClick={() => setShowSidebar(!showSidebar)}
         >
           x

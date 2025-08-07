@@ -129,7 +129,7 @@ const JSON_Template = () => {
         <>
             <ToastContainer/>
             <div
-                className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+                className="">
                 {/* Header */}
                 <div
                     className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">

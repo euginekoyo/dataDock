@@ -1,82 +1,84 @@
 import React from 'react';
 import Layout from '../../layouts/Layout';
 import Link from 'next/link';
+import { BookOpen } from 'lucide-react';
 
 const librariesList = [
   {
     id: 1,
     template_name: 'CSV Libraries',
     template_description:
-      'Prepare the CSVs and data then get it validated by creating a DataDock template before importing.',
+        'Prepare the CSVs and data then get it validated by creating a DataDock template before importing.',
     link: '/csvlibraries',
   },
   {
     id: 2,
     template_name: 'Template Libraries',
     template_description:
-      'List of popular template libraries that you can use to prepare your CSV file.',
+        'List of popular template libraries that you can use to prepare your CSV file.',
     link: '/templatelibraries',
   },
   {
     id: 3,
     template_name: 'Regex Libraries',
     template_description:
-      'List of popular regex libraries that you can use to prepare your CSV file.',
+        'List of popular regex libraries that you can use to prepare your CSV file.',
     link: '/regexlibraries',
   },
 ];
 
-const index = () => {
+const Index = () => {
   return (
-    <>
       <Layout>
-        <div className="overflow-x-auto mx-4">
-          <div className="p-6">
-            <div className="mx-auto px-28 py-10 flex flex-col justify-center items-center">
-              <p className="uppercase text-3xl font-extrabold tracking-widest text-gray-600  dark:text-gray-200">
-                Welcome to DataDock! Libraries
-              </p>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+          <div className="p-6 max-w-5xl mx-auto">
+            {/* Header */}
+            <div className="mb-6 text-center">
+              <div className="flex items-center justify-center gap-2 mb-1">
+                <div className="p-1.5 bg-blue-600 rounded-lg">
+                  <BookOpen className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                  DataDock Libraries
+                </h1>
+              </div>
+              <p className="text-gray-600 text-sm">Explore our collection of libraries for CSV preparation</p>
             </div>
-            <>
-              <div className="grid grid-cols-3">
-                {librariesList.map((obj, idx) => (
+
+            {/* Libraries Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {librariesList.map((obj, idx) => (
                   <div
-                    className="mt-4 bg-white dark:bg-gray-900 rounded-md flex flex-col align-middle justify-between p-4 mx-2 shadow-sm"
-                    key={idx}
+                      className="bg-white rounded-xl shadow-md border border-blue-100 p-4 flex flex-col justify-between hover:shadow-lg transition-all duration-300 transform hover:scale-105"
+                      key={idx}
                   >
                     <div className="flex flex-col">
                       <Link href={obj.link}>
-                        <h2 className="text-lg text-blue-500 dark:text-white cursor-pointer">
+                        <h2 className="text-sm font-semibold text-blue-600 hover:text-blue-800 cursor-pointer">
                           {obj.template_name}
                         </h2>
                       </Link>
-                    </div>
-
-                    <div className="mt-4">
-                      <p className="text-gray-600 dark:text-gray-400">
+                      <p className="text-xs text-gray-600 mt-2">
                         {obj.template_description}
                       </p>
                     </div>
-
-                    <div className="mt-4 flex items-center justify-center">
+                    <div className="mt-4 flex justify-center">
                       <Link href={obj.link}>
                         <button
-                          type="button"
-                          className="bg-transparent dark:bg-white hover:bg-blue-500 text-blue-700 font-semibold hover:text-white dark:hover:text-blue-500 py-1 px-4 border border-blue-500 hover:border-transparent rounded-full text-sm mr-2"
+                            type="button"
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs"
                         >
                           View Libraries
                         </button>
                       </Link>
                     </div>
                   </div>
-                ))}
-              </div>
-            </>
+              ))}
+            </div>
           </div>
         </div>
       </Layout>
-    </>
   );
 };
 
-export default index;
+export default Index;

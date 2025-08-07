@@ -19,7 +19,7 @@ import {
   EMAIL_DATA_TYPE,
   DROPDOWN_SELECT_TEXT,
 } from '../../constants';
-// import Stepper from '../stepper';
+import { FileText } from 'lucide-react';
 
 const SchemaMapper = () => {
   const gridRef = useRef();
@@ -49,7 +49,7 @@ const SchemaMapper = () => {
     {
       headerName: 'Table Column',
       field: 'key',
-      cellStyle: { background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)' },
+      cellStyle: { backgroundColor: '#F8FAFC' },
       headerClass: 'modern-header',
     },
     {
@@ -62,8 +62,8 @@ const SchemaMapper = () => {
       },
       cellStyle: {
         cursor: 'pointer',
-        borderRadius: '5px',
-        background: '#ffffff',
+        borderRadius: '4px',
+        backgroundColor: '#ffffff',
       },
       headerClass: 'modern-header',
       cellClass: 'modern-cell',
@@ -74,7 +74,7 @@ const SchemaMapper = () => {
       headerName: 'Required',
       field: 'is_required',
       cellRenderer: ToggleValueRenderer,
-      cellStyle: { cursor: 'pointer', background: '#ffffff' },
+      cellStyle: { cursor: 'pointer', backgroundColor: '#ffffff' },
       headerClass: 'modern-header',
       cellClass: 'modern-cell',
     },
@@ -153,261 +153,211 @@ const SchemaMapper = () => {
   return (
       <>
         <style jsx global>{`
-        .ag-theme-alpine {
-          --ag-header-height: 30px;
-          --ag-row-height: 30px;
-          --ag-border-color: #e5e7eb;
-          --ag-header-background-color: #f9fafb;
-          --ag-row-hover-color: #f3f4f6;
-          --ag-selected-row-background-color: #dbeafe;
-          --ag-odd-row-background-color: #ffffff;
-          --ag-even-row-background-color: #fafafa;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-        }
+          .ag-theme-alpine {
+            --ag-header-height: 24px;
+            --ag-row-height: 24px;
+            --ag-border-color: #dbeafe;
+            --ag-header-background-color: #eff6ff;
+            --ag-row-hover-color: #dbeafe;
+            --ag-selected-row-background-color: #bfdbfe;
+            --ag-odd-row-background-color: #ffffff;
+            --ag-even-row-background-color: #f8fafc;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+          }
 
-        /* Hide scrollbars but keep scrolling functionality */
-        .ag-theme-alpine .ag-body-viewport {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
+          .ag-theme-alpine .ag-body-viewport {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
 
-        .ag-theme-alpine .ag-body-viewport::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, and other Webkit browsers */
-        }
+          .ag-theme-alpine .ag-body-viewport::-webkit-scrollbar {
+            display: none;
+          }
 
-        /* Ensure outer container hides scrollbars */
-        .schema-mapper-container {
-          -ms-overflow-style: none; /* IE and Edge */
-          scrollbar-width: none; /* Firefox */
-        }
+          .schema-mapper-container {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
 
-        .schema-mapper-container::-webkit-scrollbar {
-          display: none; /* Chrome, Safari, and other Webkit browsers */
-        }
+          .schema-mapper-container::-webkit-scrollbar {
+            display: none;
+          }
 
-        .modern-header {
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-          border-bottom: 2px solid #e2e8f0;
-          font-weight: 600;
-          font-size: 14px;
-          color: #374151;
-          padding: 0 16px;
-          display: flex;
-          align-items: center;
-        }
+          .modern-header {
+            background: #eff6ff;
+            border-bottom: 1px solid #dbeafe;
+            font-weight: 600;
+            font-size: 12px;
+            color: #1e40af;
+            padding: 0 12px;
+            display: flex;
+            align-items: center;
+          }
 
-        .modern-cell {
-          padding: 8px 16px;
-          border-right: 1px solid #f3f4f6;
-          transition: all 0.2s ease;
-        }
+          .modern-cell {
+            padding: 6px 12px;
+            border-right: 1px solid #dbeafe;
+            transition: all 0.2s ease;
+          }
 
-        .modern-cell:hover {
-          background: #f8fafc;
-          transform: translateY(-1px);
-        }
+          .modern-cell:hover {
+            background: #dbeafe;
+            transform: translateY(-1px);
+          }
 
-        .ag-row-even {
-          background: #ffffff;
-        }
+          .ag-row-even {
+            background: #ffffff;
+          }
 
-        .ag-row-odd {
-          background: #fafafa;
-        }
+          .ag-row-odd {
+            background: #f8fafc;
+          }
 
-        .ag-row-hover {
-          background: #f8fafc;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
-        }
+          .ag-row-hover {
+            background: #dbeafe;
+            transform: translateY(-1px);
+          }
 
-        .ag-header-row {
-          background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        }
+          .ag-header-row {
+            background: #eff6ff;
+          }
 
-        .ag-root-wrapper {
-          border-radius: 12px;
-          overflow: hidden;
-        }
+          .ag-root-wrapper {
+            border-radius: 8px;
+            overflow: hidden;
+          }
 
-        /* Style the template name input section */
-        .template-name-container {
-          background: #ffffff;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 24px;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-          margin-bottom: 16px;
-        }
+          .template-name-container {
+            background: #ffffff;
+            border: 1px solid #dbeafe;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+          }
 
-        .template-name-title {
-          font-size: 18px;
-          font-weight: 600;
-          color: #374151;
-          margin-bottom: 4px;
-        }
+          .template-name-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+          }
 
-        .template-name-description {
-          font-size: 14px;
-          color: #6b7280;
-          margin-bottom: 12px;
-        }
+          .template-name-description {
+            font-size: 12px;
+            color: #4b5563;
+            margin-bottom: 8px;
+          }
 
-        .template-name-input {
-          border: 1px solid #d1d5db;
-          border-radius: 8px;
-          padding: 10px;
-          font-size: 14px;
-          color: #374151;
-          width: 100%;
-          transition: all 0.2s ease;
-        }
+          .template-name-input {
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 12px;
+            color: #1e3a8a;
+            width: 100%;
+            transition: all 0.2s ease;
+          }
 
-        .template-name-input:focus {
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-          outline: none;
-        }
+          .template-name-input:focus {
+            border-color: #1e40af;
+            box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.1);
+            outline: none;
+          }
 
-        .error-text {
-          color: #ef4444;
-          font-size: 12px;
-          margin-top: 4px;
-        }
+          .error-text {
+            color: #dc2626;
+            font-size: 11px;
+            margin-top: 4px;
+          }
 
-        /* Style buttons */
-        .create-template-button {
-          transition: all 0.2s ease;
-          border-radius: 8px;
-          padding: 8px 16px;
-          font-size: 14px;
-          font-weight: 600;
-          background: transparent;
-          border: 1px solid #3b82f6;
-          color: #3b82f6;
-        }
+          .create-template-button {
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: transparent;
+            border: 1px solid #1e40af;
+            color: #1e40af;
+          }
 
-        .create-template-button:hover {
-          background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-          border-color: #2563eb;
-          color: #ffffff;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
+          .create-template-button:hover {
+            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
+            border-color: #1e3a8a;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+          }
+        `}</style>
 
-        /* Dark mode support */
-        .dark .ag-theme-alpine {
-          --ag-header-background-color: #1f2937;
-          --ag-row-hover-color: #374151;
-          --ag-selected-row-background-color: #1e40af;
-          --ag-odd-row-background-color: #1f2937;
-          --ag-even-row-background-color: #111827;
-          --ag-border-color: #4b5563;
-        }
-
-        .dark .modern-header {
-          background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
-          color: #e5e7eb;
-          border-bottom: 2px solid #4b5563;
-        }
-
-        .dark .modern-cell {
-          border-right: 1px solid #4b5563;
-          color: #d1d5db;
-        }
-
-        .dark .modern-cell:hover {
-          background: #374151;
-        }
-
-        .dark .ag-row-hover {
-          background: #374151;
-        }
-
-        .dark .template-name-container {
-          background: #1f2937;
-          border: 1px solid #4b5563;
-          color: #d1d5db;
-        }
-
-        .dark .template-name-title {
-          color: #e5e7eb;
-        }
-
-        .dark .template-name-description {
-          color: #9ca3af;
-        }
-
-        .dark .template-name-input {
-          background: #111827;
-          border-color: #4b5563;
-          color: #d1d5db;
-        }
-
-        .dark .template-name-input:focus {
-          border-color: #60a5fa;
-          box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
-        }
-
-        .dark .error-text {
-          color: #f87171;
-        }
-
-        .dark .create-template-button {
-          border-color: #60a5fa;
-          color: #60a5fa;
-        }
-
-        .dark .create-template-button:hover {
-          background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-          border-color: #3b82f6;
-          color: #ffffff;
-        }
-      `}</style>
-
-        <div className="schema-mapper-container">
-          {/* <Stepper step={3} /> */}
-          {!loading && (
-              <>
-                <div className="w-full sm:flex sm:space-x-8 sm:p-4">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+          <div className="p-6 max-w-5xl mx-auto">
+            {/* Header Section */}
+            <div className="bg-white rounded-xl shadow-md border border-blue-100 mb-6">
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="p-1.5 bg-blue-600 rounded-lg">
+                        <FileText className="w-6 h-6 text-white" />
+                      </div>
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        Schema Mapping
+                      </h1>
+                    </div>
+                    <p className="text-gray-600 text-sm">
+                      Define the data types and requirements for your template
+                    </p>
+                  </div>
                   <button
                       onClick={saveTemplate}
-                      className="create-template-button h-8 px-4 m-2 text-sm font-semibold ml-auto"
+                      className="create-template-button flex items-center gap-2 h-8 px-4 text-xs font-semibold"
                   >
+                    <FileText className="w-4 h-4" />
                     Create Template
                   </button>
                 </div>
-                <div className="ag-theme-alpine p-4" style={{ height: '420px', width: 'auto' }}>
-                  <div className="template-name-container my-4 flex flex-col">
-                    <h2 className="template-name-title">Name</h2>
-                    <p className="template-name-description">Name of the template</p>
-                    <div className="flex flex-col w-full">
-                      <input
-                          type="text"
-                          id="default-input"
-                          className="template-name-input"
-                          value={templateName}
-                          onChange={(e) => setTemplateName(e.target.value)}
+              </div>
+            </div>
+
+            {/* Main Content */}
+            {!loading && (
+                <div className="bg-white rounded-xl shadow-md border border-blue-100">
+                  <div className="p-4">
+                    <div className="template-name-container flex flex-col">
+                      <h2 className="template-name-title">Template Name</h2>
+                      <p className="template-name-description">Enter a name for your template</p>
+                      <div className="flex flex-col w-full">
+                        <input
+                            type="text"
+                            id="default-input"
+                            className="template-name-input"
+                            value={templateName}
+                            onChange={(e) => setTemplateName(e.target.value)}
+                        />
+                        {!templateName && <span className="error-text">Template name cannot be empty</span>}
+                      </div>
+                    </div>
+                    <div className="ag-theme-alpine" style={{ height: (state.validationTemplate?.length + 1) * 24 || 200, width: '100%' }}>
+                      <AgGridReact
+                          ref={gridRef}
+                          columnDefs={columnDefs}
+                          rowData={state.validationTemplate}
+                          onGridReady={onGridReady}
+                          rowHeight={24}
+                          headerHeight={24}
                       />
-                      {!templateName && <span className="error-text">Template name cannot be empty</span>}
                     </div>
                   </div>
-                  <AgGridReact
-                      ref={gridRef}
-                      columnDefs={columnDefs}
-                      rowData={state.validationTemplate}
-                      onGridReady={onGridReady}
-                      rowHeight={30}
-                      headerHeight={30}
-                  />
                 </div>
-              </>
-          )}
-          {loading && (
-              <UploadProgress progress={progress} loaded={recordsUploaded} />
-          )}
+            )}
+            {loading && (
+                <UploadProgress progress={progress} loaded={recordsUploaded} />
+            )}
+          </div>
         </div>
       </>
   );

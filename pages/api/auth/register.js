@@ -1,7 +1,7 @@
 import clientPromise from '../../../lib/mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { sendWelcomeEmail } from '../../../lib/email';
+import { sendWelcomeEmail } from '../../../lib/email/send-welcome-email';
 import { authMiddleware } from '../../../lib/middleware/authMiddleware';
 import { roleMiddleware } from '../../../lib/middleware/roleMiddleware';
 

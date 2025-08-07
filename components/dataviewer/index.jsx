@@ -34,7 +34,7 @@ import {
 import ReviewCsv from './reviewCsv';
 import Confetti from '../confetti';
 import { ajvCompileCustomValidator } from '../../lib/validation_util/yovalidator';
-import { InformationCircleIcon } from '@heroicons/react/24/solid';
+import { Info } from 'lucide-react';
 
 ModuleRegistry.registerModules([InfiniteRowModelModule]);
 
@@ -45,7 +45,7 @@ const GridExample = ({ version }) => {
     {
       headerName: 'Row',
       valueGetter: 'node.rowIndex + 1',
-      maxWidth: 100,
+      maxWidth: 80,
       pinned: 'left',
       lockPinned: true,
       cellClass: 'row-number-cell',
@@ -262,7 +262,7 @@ const GridExample = ({ version }) => {
     return {
       flex: 1,
       resizable: true,
-      minWidth: 120,
+      minWidth: 100,
       tooltipComponent: tooltip,
       cellClass: 'modern-cell',
       headerClass: 'modern-header',
@@ -322,7 +322,7 @@ const GridExample = ({ version }) => {
                                       <span className="cell-value">{props.value}</span>
                                       {feedback && (
                                           <div className="feedback-indicator">
-                                            <InformationCircleIcon
+                                            <Info
                                                 className="w-4 h-4 text-blue-500 hover:text-blue-700 transition-colors cursor-pointer"
                                                 title={`AI Suggestion: ${feedback}`}
                                             />
@@ -492,14 +492,14 @@ const GridExample = ({ version }) => {
     <div class="custom-loading-overlay">
       <div class="loading-content">
         <div class="loading-spinner">
-          <svg class="animate-spin h-8 w-8 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24">
+          <svg class="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
         </div>
         <div class="loading-text">
-          <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Loading Data</h3>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Please wait while we fetch your rows...</p>
+          <h3 class="text-sm font-semibold text-gray-900">Loading Data</h3>
+          <p class="text-xs text-gray-600">Please wait while we fetch your rows...</p>
         </div>
       </div>
     </div>
@@ -509,89 +509,54 @@ const GridExample = ({ version }) => {
       <>
         <style jsx global>{`
           .ag-theme-alpine {
-            --ag-header-height: 48px;
-            --ag-row-height: 48px;
-            --ag-border-color: #e5e7eb;
-            --ag-header-background-color: transparent;
-            --ag-row-hover-color: #f3f4f6;
-            --ag-selected-row-background-color: #dbeafe;
-            --ag-odd-row-background-color: transparent;
-            --ag-even-row-background-color: transparent;
-            --ag-cell-horizontal-border: 1px solid #e5e7eb;
-            border-radius: 16px;
+            --ag-header-height: 32px;
+            --ag-row-height: 32px;
+            --ag-border-color: #dbeafe;
+            --ag-header-background-color: #eff6ff;
+            --ag-row-hover-color: #dbeafe;
+            --ag-selected-row-background-color: #bfdbfe;
+            --ag-odd-row-background-color: #ffffff;
+            --ag-even-row-background-color: #f8fafc;
+            --ag-cell-horizontal-border: 1px solid #dbeafe;
+            border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            background: transparent;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+            background: #ffffff;
           }
 
-          .ag-theme-alpine-dark {
-            --ag-header-height: 48px;
-            --ag-row-height: 48px;
-            --ag-border-color: #374151;
-            --ag-header-background-color: transparent;
-            --ag-row-hover-color: #4b5563;
-            --ag-selected-row-background-color: #1e40af;
-            --ag-odd-row-background-color: transparent;
-            --ag-even-row-background-color: transparent;
-            --ag-cell-horizontal-border: 1px solid #374151;
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.2);
-            background: transparent;
-          }
-
-          .ag-theme-alpine .ag-body-viewport,
-          .ag-theme-alpine-dark .ag-body-viewport {
+          .ag-theme-alpine .ag-body-viewport {
             -ms-overflow-style: none;
             scrollbar-width: none;
           }
 
-          .ag-theme-alpine .ag-body-viewport::-webkit-scrollbar,
-          .ag-theme-alpine-dark .ag-body-viewport::-webkit-scrollbar {
+          .ag-theme-alpine .ag-body-viewport::-webkit-scrollbar {
             display: none;
           }
 
           .modern-header {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-            border-bottom: 2px solid #e5e7eb;
+            background: #eff6ff;
+            border-bottom: 1px solid #dbeafe;
             font-weight: 600;
-            font-size: 14px;
-            color: #1f2937;
-            padding: 0 16px;
+            font-size: 12px;
+            color: #1e40af;
+            padding: 0 12px;
             display: flex;
             align-items: center;
           }
 
-          .ag-theme-alpine-dark .modern-header {
-            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-            border-bottom: 2px solid #374151;
-            color: #f9fafb;
-          }
-
           .modern-cell {
-            padding: 8px 16px;
-            border-right: 1px solid #e5e7eb;
+            padding: 6px 12px;
+            border-right: 1px solid #dbeafe;
             transition: all 0.2s ease;
-            background: transparent;
-          }
-
-          .ag-theme-alpine-dark .modern-cell {
-            border-right: 1px solid #374151;
-            color: #f9fafb;
+            background: #ffffff;
           }
 
           .row-number-cell {
-            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            background: #eff6ff;
             font-weight: 600;
-            color: #6b7280;
+            color: #4b5563;
             text-align: center;
-            border-right: 2px solid #e5e7eb;
-          }
-
-          .ag-theme-alpine-dark .row-number-cell {
-            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
-            border-right: 2px solid #374151;
-            color: #d1d5db;
+            border-right: 1px solid #dbeafe;
           }
 
           .cell-content {
@@ -610,68 +575,38 @@ const GridExample = ({ version }) => {
           }
 
           .feedback-indicator {
-            margin-left: 8px;
+            margin-left: 6px;
             flex-shrink: 0;
           }
 
           .ag-cell.cell-fail {
-            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-            border-left: 4px solid #ef4444;
+            background: #fef2f2;
+            border-left: 3px solid #ef4444;
             color: #dc2626;
             font-weight: 500;
           }
 
-          .ag-theme-alpine-dark .ag-cell.cell-fail {
-            background: linear-gradient(135deg, #7f1d1d 0%, #991b1b 100%);
-            border-left: 4px solid #f87171;
-            color: #f87171;
-          }
-
           .ag-cell.null-check {
-            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
-            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+            border-left: 3px solid #f59e0b;
             color: #d97706;
             font-weight: 500;
           }
 
-          .ag-theme-alpine-dark .ag-cell.null-check {
-            background: linear-gradient(135deg, #713f12 0%, #854d0e 100%);
-            border-left: 4px solid #facc15;
-            color: #facc15;
-          }
-
           .ag-cell.cell-modified {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            border-left: 4px solid #22c55e;
+            background: #f0fdf4;
+            border-left: 3px solid #22c55e;
             color: #16a34a;
             font-weight: 500;
           }
 
-          .ag-theme-alpine-dark .ag-cell.cell-modified {
-            background: linear-gradient(135deg, #14532d 0%, #15803d 100%);
-            border-left: 4px solid #4ade80;
-            color: #4ade80;
-          }
-
           .ag-cell:hover {
-            background: #f3f4f6;
+            background: #dbeafe;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
-          }
-
-          .ag-theme-alpine-dark .ag-cell:hover {
-            background: #4b5563;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.2);
           }
 
           .ag-cell:focus-within {
-            outline: 2px solid #3b82f6;
-            outline-offset: -2px;
-          }
-
-          .ag-theme-alpine-dark .ag-cell:focus-within {
-            outline: 2px solid #60a5fa;
+            outline: 2px solid #1e40af;
             outline-offset: -2px;
           }
 
@@ -688,151 +623,107 @@ const GridExample = ({ version }) => {
             z-index: 1000;
           }
 
-          .ag-theme-alpine-dark .custom-loading-overlay {
-            background: rgba(17, 24, 39, 0.95);
-          }
-
           .loading-content {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 16px;
-            padding: 32px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-          }
-
-          .ag-theme-alpine-dark .loading-content {
-            background: #1f2937;
-          }
-
-          .loading-spinner {
-            display: flex;
-            justify-content: center;
+            gap: 12px;
+            padding: 24px;
+            background: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.05);
           }
 
           .loading-text h3 {
-            margin: 0 0 8px 0;
-            font-size: 18px;
+            margin: 0 0 6px 0;
+            font-size: 14px;
             font-weight: 600;
-            color: #1f2937;
+            color: #1e3a8a;
             text-align: center;
-          }
-
-          .ag-theme-alpine-dark .loading-text h3 {
-            color: #f9fafb;
           }
 
           .loading-text p {
             margin: 0;
-            font-size: 14px;
-            color: #6b7280;
+            font-size: 12px;
+            color: #4b5563;
             text-align: center;
-          }
-
-          .ag-theme-alpine-dark .loading-text p {
-            color: #d1d5db;
           }
 
           .ag-header-cell-text {
             font-weight: 600;
-            font-size: 14px;
+            font-size: 12px;
           }
 
           .ag-pinned-left-header {
-            border-right: 2px solid #e5e7eb;
-          }
-
-          .ag-theme-alpine-dark .ag-pinned-left-header {
-            border-right: 2px solid #374151;
+            border-right: 1px solid #dbeafe;
           }
 
           .ag-pinned-left-cols-container {
-            border-right: 2px solid #e5e7eb;
-          }
-
-          .ag-theme-alpine-dark .ag-pinned-left-cols-container {
-            border-right: 2px solid #374151;
+            border-right: 1px solid #dbeafe;
           }
 
           .ag-row-selected {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border-left: 4px solid #3b82f6;
-          }
-
-          .ag-theme-alpine-dark .ag-row-selected {
-            background: linear-gradient(135deg, #1e40af 0%, #1e3a8a 100%);
-            border-left: 4px solid #60a5fa;
+            background: #bfdbfe;
+            border-left: 3px solid #1e40af;
           }
 
           .ag-row-hover {
-            background: #f3f4f6;
+            background: #dbeafe;
             transform: translateY(-1px);
-            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.1);
-          }
-
-          .ag-theme-alpine-dark .ag-row-hover {
-            background: #4b5563;
-            box-shadow: 0 2px 4px -1px rgb(0 0 0 / 0.2);
-          }
-
-          .ag-row-even,
-          .ag-row-odd {
-            background: transparent;
           }
 
           .ag-header-row {
-            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          }
-
-          .ag-theme-alpine-dark .ag-header-row {
-            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+            background: #eff6ff;
           }
 
           .ag-root-wrapper {
-            border-radius: 16px;
+            border-radius: 8px;
             overflow: hidden;
           }
         `}</style>
 
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-          {/* Header */}
-          <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-            <div className="max-w-7xl mx-auto px-6 py-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900 dark:text-white">
-                    Data Review Grid
-                  </h1>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Review and edit your data with real-time validation
-                  </p>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Errors</span>
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+          <div className="p-6 max-w-5xl mx-auto">
+            {/* Header */}
+            <div className="bg-white rounded-xl shadow-md border border-blue-100 mb-6">
+              <div className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="p-1.5 bg-blue-600 rounded-lg">
+                        <Info className="w-6 h-6 text-white" />
+                      </div>
+                      <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                        Data Review Grid
+                      </h1>
+                    </div>
+                    <p className="text-sm text-gray-600">
+                      Review and edit your data with real-time validation
+                    </p>
                   </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Required</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <span className="text-xs text-gray-600 dark:text-gray-400">Modified</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-xs text-gray-600">Errors</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span className="text-xs text-gray-600">Required</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-xs text-gray-600">Modified</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Main Content */}
-          <div className="max-w-7xl mx-auto px-6 py-8">
-            {version === 'norm' && <Stepper step={4} />}
-            {isErrorFree && <Confetti />}
+            {/* Main Content */}
+            <div className="space-y-4">
+              {version === 'norm' && <Stepper step={4} />}
+              {isErrorFree && <Confetti />}
 
-            <div className="space-y-6">
               <ReviewCsv
                   collectionName={state.collection}
                   fileName={state?.curFile?.path}
@@ -849,10 +740,10 @@ const GridExample = ({ version }) => {
                   undoAutoFix={undoAutoFix}
               />
 
-              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+              <div className="bg-white rounded-xl shadow-md border border-blue-100 overflow-hidden">
                 <div
-                    style={{ height: 520, width: '100%' }}
-                    className="ag-theme-alpine dark:ag-theme-alpine-dark"
+                    style={{ height: 400, width: '100%' }}
+                    className="ag-theme-alpine"
                 >
                   <AgGridReact
                       ref={gridRef}
@@ -870,8 +761,8 @@ const GridExample = ({ version }) => {
                       tooltipHideDelay={999999}
                       onCellValueChanged={onCellValueChanged}
                       onGridReady={onGridReady}
-                      rowHeight={48}
-                      headerHeight={48}
+                      rowHeight={32}
+                      headerHeight={32}
                       animateRows={true}
                       enableRangeSelection={true}
                       suppressMovableColumns={true}

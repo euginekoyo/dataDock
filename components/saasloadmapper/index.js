@@ -19,6 +19,7 @@ import { Tab } from '@headlessui/react';
 import classNames from 'classnames';
 import Link from 'next/link';
 import cuid from 'cuid';
+import { UploadCloud } from 'lucide-react';
 
 const columnMatcher = ({ saasTemplate, validationTemplate }) => {
     if (!saasTemplate || !validationTemplate) return;
@@ -231,12 +232,12 @@ const SassLoadMapper = () => {
     let frameworkComponents = { checkboxRenderer: CheckboxComponent };
 
     const GridWrapper = ({ children }) => (
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div className="p-6">
+        <div className="bg-white rounded-xl shadow-md border border-blue-100 overflow-hidden">
+            <div className="p-4">
                 <div
-                    className="ag-theme-alpine rounded-lg overflow-hidden border border-gray-200 dark:border-gray-600"
+                    className="ag-theme-alpine rounded-lg overflow-hidden border border-blue-100"
                     style={{
-                        height: (state.curSaasLoadMapperTemplate?.length + 1) * 67 || 400,
+                        height: (state.curSaasLoadMapperTemplate?.length + 1) * 50 || 300,
                         width: '100%',
                     }}
                 >
@@ -249,26 +250,31 @@ const SassLoadMapper = () => {
     return (
         <>
             {!loading && (
-                <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-                    <div className="container mx-auto px-4 lg:px-8">
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+                    <div className="p-6 max-w-5xl mx-auto">
                         {/* Header Section */}
-                        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 mb-8">
-                            <div className="p-6">
+                        <div className="bg-white rounded-xl shadow-md border border-blue-100 mb-6">
+                            <div className="p-4">
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">
-                                            Column Mapping
-                                        </h1>
-                                        <p className="text-gray-600 dark:text-gray-300">
-                                            Change or confirm column matches between your CSV and template
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <div className="p-1.5 bg-blue-600 rounded-lg">
+                                                <UploadCloud className="w-6 h-6 text-white" />
+                                            </div>
+                                            <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                                                Column Mapping
+                                            </h1>
+                                        </div>
+                                        <p className="text-gray-600 text-sm">
+                                            Map your CSV columns to the template fields
                                         </p>
                                     </div>
                                     <button
                                         onClick={saveTemplate}
-                                        className="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-500/50 dark:focus:ring-blue-400/50"
+                                        className="group flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg px-4 py-2 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 text-xs"
                                     >
-                                        <span className="relative z-10">Upload Data</span>
-                                        <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                                        <UploadCloud className="w-4 h-4" />
+                                        Upload Data
                                     </button>
                                 </div>
                             </div>
@@ -276,7 +282,7 @@ const SassLoadMapper = () => {
 
                         {/* Main Content */}
                         {!hideAi ? (
-                            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700">
+                            <div className="bg-white rounded-xl shadow-md border border-blue-100">
                                 <Tab.Group
                                     onChange={(index) => {
                                         setSelectedTab(index);
@@ -284,30 +290,30 @@ const SassLoadMapper = () => {
                                     defaultIndex={1}
                                 >
                                     {/* Tab Navigation */}
-                                    <div className="border-b border-gray-200 dark:border-gray-700 p-6 pb-0">
-                                        <Tab.List className="flex space-x-1 rounded-xl bg-gray-100 dark:bg-gray-700 p-1">
+                                    <div className="border-b border-blue-100 p-4 pb-0">
+                                        <Tab.List className="flex space-x-1 rounded-lg bg-blue-50/30 p-1">
                                             <Tab
                                                 className={({ selected }) =>
                                                     classNames(
-                                                        'w-full relative rounded-lg py-3 px-4 text-sm font-medium leading-5 transition-all duration-200',
+                                                        'w-full relative rounded-lg py-2 px-3 text-xs font-semibold transition-all duration-200',
                                                         selected
-                                                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                                                            : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600/50'
+                                                            ? 'bg-white text-blue-600 shadow-sm'
+                                                            : 'text-gray-600 hover:bg-blue-100'
                                                     )
                                                 }
                                             >
                                                 <span>With DataDock-AI</span>
-                                                <div className="absolute inline-flex items-center px-2 py-0.5 justify-center text-xs font-bold text-white bg-red-500 rounded-full -top-1 -right-1">
+                                                <div className="absolute inline-flex items-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full -top-1 -right-1">
                                                     BETA
                                                 </div>
                                             </Tab>
                                             <Tab
                                                 className={({ selected }) =>
                                                     classNames(
-                                                        'w-full rounded-lg py-3 px-4 text-sm font-medium leading-5 transition-all duration-200',
+                                                        'w-full rounded-lg py-2 px-3 text-xs font-semibold transition-all duration-200',
                                                         selected
-                                                            ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm'
-                                                            : 'text-gray-600 dark:text-gray-300 hover:bg-white/50 dark:hover:bg-gray-600/50'
+                                                            ? 'bg-white text-blue-600 shadow-sm'
+                                                            : 'text-gray-600 hover:bg-blue-100'
                                                     )
                                                 }
                                             >
@@ -318,11 +324,11 @@ const SassLoadMapper = () => {
 
                                     {/* Tab Panels */}
                                     <Tab.Panels>
-                                        <Tab.Panel className="p-6">
-                                            <div className="mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-                                                <div className="flex items-center space-x-2">
-                                                    <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                                                    <p className="text-sm text-blue-800 dark:text-blue-200 font-medium">
+                                        <Tab.Panel className="p-4">
+                                            <div className="mb-4 p-3 bg-blue-50/30 rounded-lg border border-blue-100">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-pulse"></div>
+                                                    <p className="text-xs text-blue-800 font-medium">
                                                         AI-powered column matching active
                                                     </p>
                                                 </div>
@@ -333,7 +339,7 @@ const SassLoadMapper = () => {
                                                     columnDefs={columnDefs}
                                                     rowData={state.curSaasLoadMapperTemplate}
                                                     onGridReady={onGridReady}
-                                                    rowHeight={70}
+                                                    rowHeight={50}
                                                     suppressHorizontalScroll={true}
                                                     suppressRowClickSelection={true}
                                                     rowSelection={'multiple'}
@@ -342,11 +348,11 @@ const SassLoadMapper = () => {
                                                 />
                                             </GridWrapper>
                                         </Tab.Panel>
-                                        <Tab.Panel className="p-6">
-                                            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                                                <div className="flex items-center space-x-2">
-                                                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                                                    <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                                        <Tab.Panel className="p-4">
+                                            <div className="mb-4 p-3 bg-blue-50/30 rounded-lg border border-blue-100">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
+                                                    <p className="text-xs text-gray-600 font-medium">
                                                         String similarity matching active
                                                     </p>
                                                 </div>
@@ -357,7 +363,7 @@ const SassLoadMapper = () => {
                                                     columnDefs={columnDefs}
                                                     rowData={state.curSaasLoadMapperTemplate}
                                                     onGridReady={onGridReady}
-                                                    rowHeight={70}
+                                                    rowHeight={50}
                                                     suppressHorizontalScroll={true}
                                                     suppressRowClickSelection={true}
                                                     rowSelection={'multiple'}
@@ -371,10 +377,10 @@ const SassLoadMapper = () => {
                             </div>
                         ) : (
                             <div>
-                                <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600">
-                                    <div className="flex items-center space-x-2">
-                                        <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
-                                        <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                                <div className="mb-4 p-3 bg-blue-50/30 rounded-lg border border-blue-100">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-gray-500 rounded-full"></div>
+                                        <p className="text-xs text-gray-600 font-medium">
                                             String similarity matching active
                                         </p>
                                     </div>
@@ -385,7 +391,7 @@ const SassLoadMapper = () => {
                                         columnDefs={columnDefs}
                                         rowData={state.curSaasLoadMapperTemplate}
                                         onGridReady={onGridReady}
-                                        rowHeight={70}
+                                        rowHeight={50}
                                         suppressHorizontalScroll={true}
                                         suppressRowClickSelection={true}
                                         rowSelection={'multiple'}

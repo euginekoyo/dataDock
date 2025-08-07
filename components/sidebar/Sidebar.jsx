@@ -2,8 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { hasPermission } from '../../lib/roles';
-import { HomeIcon, UsersIcon, FolderIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { ArticleIcon } from './icons';
+import { Home, Users, Folder, FileText, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import classNames from 'classnames';
 
@@ -11,28 +10,28 @@ const menuItems = [
     {
         id: 0,
         label: 'Home',
-        icon: HomeIcon,
+        icon: Home,
         link: '/',
         permission: 'view_dashboard',
     },
     {
         id: 1,
         label: 'User Management',
-        icon: UsersIcon,
+        icon: Users,
         link: '/dashboard',
         permission: 'manage_users',
     },
     {
         id: 2,
         label: 'Template Configuration',
-        icon: ArticleIcon,
+        icon: FileText,
         link: '/templates',
         permission: 'view_templates',
     },
     {
         id: 3,
         label: 'Libraries',
-        icon: FolderIcon,
+        icon: Folder,
         link: '/libraries',
         permission: 'view_libraries',
     },
@@ -95,17 +94,15 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const sidebarClasses = classNames(
-        'fixed left-0 top-0 h-screen flex flex-col border-r transition-all duration-300 ease-in-out z-40',
-        'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700',
-        'shadow-lg dark:shadow-gray-900/20',
+        'fixed left-0 top-0 h-screen flex flex-col border-r transition-all duration-200 bg-white border-blue-100 shadow-md',
         {
-            'w-64': !toggleCollapse,
-            'w-16': toggleCollapse,
+            'w-56': !toggleCollapse,
+            'w-14': toggleCollapse,
         }
     );
 
     const overlayClasses = classNames(
-        'fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 z-30 md:hidden',
+        'fixed inset-0 bg-black bg-opacity-30 transition-opacity duration-200 z-10 md:hidden',
         {
             'opacity-100 visible': !toggleCollapse && isMobile,
             'opacity-0 invisible': toggleCollapse || !isMobile,
@@ -113,10 +110,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const collapseButtonClasses = classNames(
-        'absolute -right-3 top-6 z-50 p-1.5 rounded-full border shadow-md',
-        'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600',
-        'hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-200',
-        'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+        'absolute -right-2.5 top-5 z-20 p-1 rounded-full border shadow-sm bg-white border-blue-100 hover:bg-blue-50 transition-all duration-200',
         {
             'rotate-180': toggleCollapse,
         }
@@ -125,23 +119,20 @@ const Sidebar = ({ onToggle }) => {
     const getNavItemClasses = (menu) => {
         const isActive = activeMenu?.id === menu.id;
         return classNames(
-            'group relative flex items-center w-full px-3 py-3 rounded-lg',
-            'transition-all duration-200 ease-in-out cursor-pointer',
-            'hover:bg-gray-100 dark:hover:bg-gray-800',
-            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-900',
+            'group relative flex items-center w-full px-2.5 py-2 rounded-lg transition-all duration-200 cursor-pointer hover:bg-blue-50',
             {
-                'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-r-2 border-blue-600': isActive,
-                'text-gray-700 dark:text-gray-300': !isActive,
+                'bg-blue-50 text-blue-600 border-r-2 border-blue-600': isActive,
+                'text-gray-600': !isActive,
             }
         );
     };
 
     const iconClasses = classNames(
-        'w-5 h-5 flex-shrink-0 transition-colors duration-200'
+        'w-4 h-4 flex-shrink-0 transition-colors duration-200'
     );
 
     const labelClasses = classNames(
-        'ml-3 text-sm font-medium truncate transition-all duration-200',
+        'ml-2 text-xs font-medium truncate transition-all duration-200',
         {
             'opacity-0 translate-x-4 pointer-events-none': toggleCollapse,
             'opacity-100 translate-x-0': !toggleCollapse,
@@ -149,9 +140,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const tooltipClasses = classNames(
-        'absolute left-full ml-2 px-2 py-1 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded',
-        'opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none',
-        'whitespace-nowrap z-50 transform translate-x-2 group-hover:translate-x-0'
+        'absolute left-full ml-1.5 px-1.5 py-0.5 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-20'
     );
 
     const handleMouseEnter = () => {
@@ -187,9 +176,12 @@ const Sidebar = ({ onToggle }) => {
 
     if (!user) {
         return (
-            <div className="fixed left-0 top-0 w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <span className="ml-3 text-gray-600 dark:text-gray-300">Loading...</span>
+            <div className="fixed left-0 top-0 w-56 h-screen bg-white border-r border-blue-100 flex items-center justify-center">
+                <svg className="animate-spin h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span className="ml-2 text-sm text-gray-600">Loading...</span>
             </div>
         );
     }
@@ -202,28 +194,24 @@ const Sidebar = ({ onToggle }) => {
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
             >
-                <div className="relative p-4 border-b border-gray-100 dark:border-gray-800">
+                <div className="relative p-3 border-b border-blue-50">
                     <div
-                        className={classNames('flex items-center transition-all duration-300', {
+                        className={classNames('flex items-center transition-all duration-200', {
                             'justify-center': toggleCollapse,
                             'justify-start': !toggleCollapse,
                         })}
                     >
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
-                            <span className="text-white font-bold text-sm">L</span>
+                        <div className="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-700 rounded-lg flex items-center justify-center shadow-sm">
+                            <span className="text-white font-bold text-xs">L</span>
                         </div>
                         <div
-                            className={classNames('ml-3 transition-all duration-300 overflow-hidden', {
+                            className={classNames('ml-2 transition-all duration-200 overflow-hidden', {
                                 'w-0 opacity-0': toggleCollapse,
                                 'w-auto opacity-100': !toggleCollapse,
                             })}
                         >
-              <span className="text-lg font-semibold text-gray-900 dark:text-white whitespace-nowrap">
-                Dashboard
-              </span>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
-                                Management Panel
-                            </p>
+                            <span className="text-base font-semibold text-gray-900">Dashboard</span>
+                            <p className="text-xs text-gray-500">Management Panel</p>
                         </div>
                     </div>
                     {(isCollapsible || isMobile) && (
@@ -232,14 +220,14 @@ const Sidebar = ({ onToggle }) => {
                             onClick={handleToggle}
                             aria-label={toggleCollapse ? 'Expand sidebar' : 'Collapse sidebar'}
                         >
-                            <ChevronLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                            <ChevronLeft className="w-3 h-3 text-gray-600" />
                         </button>
                     )}
                 </div>
-                <nav className="flex-1 px-4 py-4 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
+                <nav className="flex-1 px-3 py-3 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-200">
                     {filteredMenuItems.length === 0 ? (
-                        <div className="flex items-center justify-center h-32">
-                            <p className="text-gray-500 dark:text-gray-400 text-sm text-center">
+                        <div className="flex items-center justify-center h-24">
+                            <p className="text-gray-500 text-xs text-center">
                                 {toggleCollapse ? '🚫' : 'No permissions available'}
                             </p>
                         </div>
@@ -258,12 +246,12 @@ const Sidebar = ({ onToggle }) => {
                                                 <Icon className={iconClasses} />
                                                 <span className={labelClasses}>{menu.label}</span>
                                                 {isActive && !toggleCollapse && (
-                                                    <div className="absolute right-2 w-2 h-2 bg-blue-600 rounded-full" />
+                                                    <div className="absolute right-1.5 w-1.5 h-1.5 bg-blue-600 rounded-full" />
                                                 )}
                                                 {toggleCollapse && (
                                                     <div className={tooltipClasses}>
                                                         {menu.label}
-                                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-gray-900 dark:bg-gray-700 rotate-45" />
+                                                        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-0.5 w-1.5 h-1.5 bg-gray-800 rotate-45" />
                                                     </div>
                                                 )}
                                             </a>
@@ -274,41 +262,41 @@ const Sidebar = ({ onToggle }) => {
                         </div>
                     )}
                 </nav>
-                <div className="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                <div className="p-3 border-t border-blue-50 bg-blue-50">
                     <div
-                        className={classNames('flex items-center transition-all duration-300', {
+                        className={classNames('flex items-center transition-all duration-200', {
                             'justify-center': toggleCollapse,
                             'justify-start': !toggleCollapse,
                         })}
                     >
                         <div className="relative">
-                            <div className="w-8 h-8 bg-gradient-to-br from-gray-400 to-gray-500 dark:from-gray-500 dark:to-gray-600 rounded-full flex items-center justify-center shadow-sm">
-                <span className="text-white text-xs font-medium">
-                  {user?.name?.[0]?.toUpperCase() || 'U'}
-                </span>
+                            <div className="w-7 h-7 bg-gradient-to-br from-gray-400 to-gray-500 rounded-full flex items-center justify-center shadow-sm">
+                                <span className="text-white text-xs font-medium">
+                                    {user?.name?.[0]?.toUpperCase() || 'U'}
+                                </span>
                             </div>
                             {user?.isOnline && (
-                                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white dark:border-gray-800 rounded-full" />
+                                <div className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-green-500 border border-white rounded-full" />
                             )}
                         </div>
                         <div
-                            className={classNames('ml-3 min-w-0 flex-1 transition-all duration-300', {
+                            className={classNames('ml-2 min-w-0 flex-1 transition-all duration-200', {
                                 'opacity-0 w-0 overflow-hidden': toggleCollapse,
                                 'opacity-100 w-auto': !toggleCollapse,
                             })}
                         >
-                            <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                            <p className="text-xs font-medium text-gray-900 truncate">
                                 {user?.name || 'User'}
                             </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                            <p className="text-xs text-gray-500 truncate">
                                 {user?.role || 'No role'}
                             </p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500 truncate">
+                            <p className="text-xs text-gray-400 truncate">
                                 {user?.email || 'user@example.com'}
                             </p>
                             <button
                                 onClick={handleLogout}
-                                className="mt-2 text-xs text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200 font-medium"
+                                className="mt-1 text-xs text-red-600 hover:text-red-800 transition-colors duration-200"
                             >
                                 Sign out
                             </button>

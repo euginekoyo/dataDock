@@ -39,41 +39,77 @@ const Home = () => {
     if (loading || !user) return null;
 
     return (
-        <div id="home" className="w-full text-center dark:bg-gray-800">
-            {error && <p className="text-red-500">{error}</p>}
-            <div className="max-w-[1240px] mx-auto px-28 pt-7 flex flex-col justify-center items-center">
-                <div>
-                    <p className="uppercase text-5xl font-extrabold tracking-widest text-gray-600 dark:text-gray-200">
-                        Welcome to DataDock!
-                    </p>
+        <div id="home" className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+            <div className="p-6 max-w-5xl mx-auto">
+                {/* Error Alert */}
+                {error && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-center justify-between shadow-md">
+                        <div className="flex items-center gap-2">
+                            <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                            </svg>
+                            <span className="text-red-700 text-sm font-medium">{error}</span>
+                        </div>
+                        <button
+                            onClick={() => setError('')}
+                            className="text-red-500 hover:text-red-700 p-1 rounded-md hover:bg-red-100 transition-colors"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                )}
+
+                {/* Welcome Header */}
+                <div className="mb-6 text-center">
+                    <div className="flex items-center justify-center gap-2 mb-1">
+                        <div className="p-1.5 bg-blue-600 rounded-lg">
+                            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                        </div>
+                        <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                            Welcome to DataDock!
+                        </h1>
+                    </div>
+                    <p className="text-gray-600 text-sm">Effortlessly import and validate your CSV data</p>
                 </div>
-                <div className="w-full flex flex-col gap-1 mt-4 bg-gray-50 text-left py-2 px-4 dark:bg-gray-900">
-                    <h1 className="py-2 text-gray-500 dark:text-gray-200 text-2xl font-medium tracking-wider text-center">
-                        DataDock Quick Walkthrough 🚀
-                    </h1>
-                    <p className="mt-1 text-gray-500 text-center dark:text-gray-200">
-                        Demo of importing and validating a CSV with a pre-configured template.
+
+                {/* Quick Walkthrough Section */}
+                <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-6 mb-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                        DataDock Quick Walkthrough
+                    </h2>
+                    <p className="text-gray-600 text-sm text-center mb-4">
+                        Demo of importing and validating a CSV with a pre-configured template
                     </p>
-                    <div className="p-4 text-black dark:text-white">
-                        <div className="w-full flex flex-col gap-1 shadow-sm text-left py-2 px-4 bg-white dark:bg-gray-800">
-                            <h1 className="text-xl">Step 1</h1>
-                            <div className="flex justify-between text-center items-center">
-                                <p className="text-md text-gray-700 dark:text-gray-300">
-                                    The template is pre-configured with the field values: id, name, email, date, status.
+                    <div className="space-y-4">
+                        {/* Step 1 */}
+                        <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-lg">
+                            <h3 className="text-sm font-semibold text-gray-700">Step 1</h3>
+                            <div className="flex justify-between items-center">
+                                <p className="text-xs text-gray-600">
+                                    The template is pre-configured with the field values: id, name, email, date, status
                                 </p>
-                                <Link href="https://drive.google.com/uc?export=download&id=1iYSU8CswQz8e_3wRCMpWARz8fXnAzBJR">
-                                    <button className="bg-[#5EB4EA] w-[160px] h-[40px] text-sm text-white p-2 rounded-md dark:bg-white dark:text-black">
+                                <a href="/csv/DataDock_Data_Type_Validation.csv" download>
+                                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                         Download CSV
                                     </button>
-                                </Link>
+                                </a>
                             </div>
                         </div>
-                        <div className="w-full flex flex-col gap-1 mt-2 shadow-sm text-left py-2 px-4 bg-white dark:bg-gray-800">
-                            <div className="flex gap-4 items-center">
-                                <h1 className="text-xl flex items-center gap-2">Step 2</h1>
-                                <Popover className="z-10 flex">
+
+                        {/* Step 2 */}
+                        <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-lg">
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-semibold text-gray-700">Step 2</h3>
+                                <Popover className="relative">
                                     <Popover.Button>
-                                        <InformationCircleIcon className="h-5 w-5 text-gray-400 dark:text-gray-300" />
+                                        <InformationCircleIcon className="h-4 w-4 text-gray-400" />
                                     </Popover.Button>
                                     <Transition
                                         as={Fragment}
@@ -84,32 +120,32 @@ const Home = () => {
                                         leaveFrom="opacity-100 translate-y-0"
                                         leaveTo="opacity-0 translate-y-1"
                                     >
-                                        <Popover.Panel className="absolute z-10 mt-6 ml-24 bg-white rounded border-2 p-2 -translate-x-1/2">
-                                            <p>Create a template with the same schema as the CSV.</p>
-                                            <img src="/solutions.jpg" alt="CSV schema" />
+                                        <Popover.Panel className="absolute z-10 mt-2 bg-white rounded border border-blue-100 p-2 shadow-md -translate-x-1/2">
+                                            <p className="text-xs">Create a template with the same schema as the CSV.</p>
+                                            <img src="/solutions.jpg" alt="CSV schema" className="mt-2 max-w-[200px]" />
                                         </Popover.Panel>
                                     </Transition>
                                 </Popover>
                             </div>
-                            <div className="flex justify-between text-center items-center">
-                                <p className="text-md text-gray-700 dark:text-gray-300">
-                                    Start the Import Flow and make the corrections.
-                                </p>
+                            <div className="flex justify-between items-center">
+                                <p className="text-xs text-gray-600">Start the Import Flow and make the corrections</p>
                                 <Link href={`/templates/testtemplate/${defaultTemplateId || ''}`}>
-                                    <button className="bg-[#5EB4EA] w-[160px] h-[40px] text-sm text-white p-2 rounded-md dark:bg-white dark:text-black">
+                                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                         Import CSV
                                     </button>
                                 </Link>
                             </div>
                         </div>
-                        <div className="w-full flex flex-col gap-1 mt-2 text-left py-2 px-4 bg-white dark:bg-gray-800">
-                            <h1 className="text-xl">Step 3</h1>
-                            <div className="flex justify-between text-center items-center">
-                                <p className="text-left text-md text-gray-700 dark:text-gray-300">
-                                    Go To Imports Section and check the status. <br /> CSV Data is imported successfully to your MongoDB.
+
+                        {/* Step 3 */}
+                        <div className="flex flex-col gap-1 p-4 bg-blue-50 rounded-lg">
+                            <h3 className="text-sm font-semibold text-gray-700">Step 3</h3>
+                            <div className="flex justify-between items-center">
+                                <p className="text-xs text-gray-600">
+                                    Go to Imports Section and check the status. CSV Data is imported successfully to your MongoDB.
                                 </p>
                                 <Link href="/imports">
-                                    <button className="bg-[#5EB4EA] w-[160px] h-[40px] text-sm text-white p-2 rounded-md dark:bg-white dark:text-black">
+                                    <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                         Validate Import Status
                                     </button>
                                 </Link>
@@ -117,26 +153,31 @@ const Home = () => {
                         </div>
                     </div>
                 </div>
-                <div className="w-full flex flex-col gap-1 shadow-sm text-left py-2 px-4 mt-4 border bg-slate-50 dark:bg-gray-900">
-                    <h1 className="py-2 text-gray-500 text-2xl font-medium tracking-wider text-center dark:text-gray-200">
-                        Sample CSVs to Try 👨🏻‍💻
-                    </h1>
-                    <div className="p-4 flex flex-wrap justify-between">
-                        <Link href="https://drive.google.com/uc?export=download&id=1lTgaCFkY-x91NXwltO9oAQ3NnEiwZstk">
-                            <button className="bg-[#5EB4EA] text-sm text-white p-2 rounded-md m-1 dark:bg-white dark:text-black">
+
+                {/* Sample CSVs Section */}
+                <div className="bg-white rounded-xl shadow-lg border border-blue-100 p-6">
+                    <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Sample CSVs to Try
+                    </h2>
+                    <div className="flex flex-wrap gap-3">
+                        <a href="/csv/million_records.csv" download>
+                            <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                 CSV with 1 million records
                             </button>
-                        </Link>
-                        <Link href="https://drive.google.com/uc?export=download&id=1ox_bREP5eTVzbntJ1eCPuTHRyAHhK1VX">
-                            <button className="bg-[#5EB4EA] text-sm text-white p-2 rounded-md m-1 dark:bg-white dark:text-black">
+                        </a>
+                        <a href="/csv/mail_validation.csv" download>
+                            <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                 CSV for custom mail validation
                             </button>
-                        </Link>
-                        <Link href="https://drive.google.com/uc?export=download&id=1IhOATPL-GJNORxOh-FBQwKLGFzLtOED-">
-                            <button className="bg-[#5EB4EA] text-sm text-white p-2 rounded-md m-1 dark:bg-white dark:text-black">
+                        </a>
+                        <a href="/csv/integer_validation.csv" download>
+                            <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                 CSV for custom integer validation
                             </button>
-                        </Link>
+                        </a>
                     </div>
                 </div>
             </div>
