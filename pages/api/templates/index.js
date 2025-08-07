@@ -1,95 +1,126 @@
 import clientPromise from '../../../lib/mongodb';
+import { ObjectId } from 'mongodb'; // Import ObjectId directly
 import generateSchema from '../../../lib/template-engine';
-let ObjectId = require('mongodb').ObjectId;
 
 export default async function fetchTemplateRecords(req, res) {
   const client = await clientPromise;
-  const db = client.db(process.env.DATABASE_NAME | 'DataDock');
+  const db = client.db(process.env.DATABASE_NAME || 'DataDock');
+
   switch (req.method) {
     case 'GET':
-      let query = {};
-      if (req.headers.template_id) {
-        query = { _id: ObjectId(req.headers.template_id) };
-        try {
-          let result = await db.collection('templates').findOne(query);
-          res.send(result);
-        } catch (err) {
-          console.error(err.message);
+      try {
+        let query = {};
+        if (req.headers.template_id) {
+          // Validate template_id format
+          if (!/^[0-9a-fA-F]{24}$/.test(req.headers.template_id)) {
+            return res.status(400).json({ error: 'Invalid template_id format' });
+          }
+          query = { _id: new ObjectId(req.headers.template_id) }; // Use new ObjectId
+          const result = await db.collection('templates').findOne(query);
+          if (!result) {
+            return res.status(404).json({ error: 'Template not found' });
+          }
+          return res.status(200).json(result);
+        } else {
+          const result = await db.collection('templates').find({}).toArray();
+          return res.status(200).json(result);
         }
-      } else {
-        try {
-          let result = await db.collection('templates').find({}).toArray();
-          res.send(result);
-        } catch (err) {
-          console.error(err.message);
-          res.status(500).json({ error: 'failed to load data' });
-        }
+      } catch (err) {
+        console.error('GET error:', err);
+        return res.status(500).json({ error: 'Failed to load data' });
       }
-      break;
+
     case 'POST':
       try {
-        console.log(req.body);
-        let templateBody = req.body;
+        const templateBody = req.body;
         if (!templateBody.columns || !Array.isArray(templateBody.columns)) {
-          console.error('Invalid or missing columns array');
           return res.status(400).json({ error: 'Columns array is required' });
         }
+
         if (templateBody.baseTemplateId) {
-          let baseTemplate = await db
+          if (!/^[0-9a-fA-F]{24}$/.test(templateBody.baseTemplateId)) {
+            return res.status(400).json({ error: 'Invalid baseTemplateId format' });
+          }
+          const baseTemplate = await db
               .collection('templates')
-              .findOne({ _id: ObjectId(templateBody.baseTemplateId) });
-          let columnLabels = templateBody.columns.map((el) => el.label);
-          let baseTemplateSchema = baseTemplate.schema;
-          let requiredCols = baseTemplateSchema.required?.filter((el) =>
+              .findOne({ _id: new ObjectId(templateBody.baseTemplateId) }); // Use new ObjectId
+          if (!baseTemplate) {
+            return res.status(404).json({ error: 'Base template not found' });
+          }
+          const columnLabels = templateBody.columns.map((el) => el.label);
+          const requiredCols = baseTemplate.schema.required?.filter((el) =>
               columnLabels.includes(el)
           );
-          baseTemplateSchema.required = requiredCols;
-          templateBody.schema = baseTemplateSchema;
+          templateBody.schema = {
+            ...baseTemplate.schema,
+            required: requiredCols || [],
+          };
           templateBody.validators = baseTemplate.validators;
         } else {
-          let generatedSchema = generateSchema(templateBody.columns);
-          templateBody.schema = generatedSchema;
+          templateBody.schema = generateSchema(templateBody.columns);
         }
+
         templateBody.created_date = new Date().toISOString();
-        templateBody.template_name = req.body.template_name
-            ? req.body.template_name
-            : req.body.fileName;
-        let result = await db.collection('templates').insertOne(templateBody);
-        res.send(result);
+        templateBody.template_name = templateBody.template_name || templateBody.fileName;
+
+        const result = await db.collection('templates').insertOne(templateBody);
+        return res.status(201).json(result);
       } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'failed to create data' });
+        console.error('POST error:', err);
+        return res.status(500).json({ error: 'Failed to create data' });
       }
-      break;
+
     case 'PUT':
       try {
-        let columnsData = req.body.columns;
-        let data = req.body;
-        let generatedSchemaUpdate = generateSchema(columnsData);
-        data.schema = generatedSchemaUpdate;
-        let result = await db
-          .collection('templates')
-          .updateOne(
-            { _id: ObjectId(req.query.template_id) },
-            { $set: data },
-            { upsert: false }
-          );
-        res.send(result);
+        const { template_id } = req.query;
+        if (!template_id || !/^[0-9a-fA-F]{24}$/.test(template_id)) {
+          return res.status(400).json({ error: 'Invalid template_id format' });
+        }
+
+        const { columns, ...data } = req.body;
+        if (!columns || !Array.isArray(columns)) {
+          return res.status(400).json({ error: 'Columns array is required' });
+        }
+
+        data.schema = generateSchema(columns);
+        const result = await db
+            .collection('templates')
+            .updateOne(
+                { _id: new ObjectId(template_id) }, // Use new ObjectId
+                { $set: data },
+                { upsert: false }
+            );
+
+        if (result.matchedCount === 0) {
+          return res.status(404).json({ error: 'Template not found' });
+        }
+        return res.status(200).json(result);
       } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'failed to put data' });
+        console.error('PUT error:', err);
+        return res.status(500).json({ error: 'Failed to update data' });
       }
-      break;
+
     case 'DELETE':
       try {
-        let result = await db
-          .collection('templates')
-          .deleteOne({ _id: ObjectId(req.query.template_id) });
-        res.send(result);
+        const { template_id } = req.query;
+        if (!template_id || !/^[0-9a-fA-F]{24}$/.test(template_id)) {
+          return res.status(400).json({ error: 'Invalid template_id format' });
+        }
+
+        const result = await db
+            .collection('templates')
+            .deleteOne({ _id: new ObjectId(template_id) }); // Use new ObjectId
+
+        if (result.deletedCount === 0) {
+          return res.status(404).json({ error: 'Template not found' });
+        }
+        return res.status(200).json(result);
       } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: 'failed to delete data' });
+        console.error('DELETE error:', err);
+        return res.status(500).json({ error: 'Failed to delete data' });
       }
-      break;
+
+    default:
+      return res.status(405).json({ error: 'Method not allowed' });
   }
 }
