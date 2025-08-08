@@ -720,7 +720,7 @@ const GridExample = ({ version }) => {
             </div>
 
             {/* Main Content */}
-            <div className="space-y-4">
+            <div className="space-y-4 w-full">
               {version === 'norm' && <Stepper step={4} />}
               {isErrorFree && <Confetti />}
 

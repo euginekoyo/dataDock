@@ -33,7 +33,7 @@ export default function ErrorTypeDropDown({ errData, selectErrorType }) {
     setSelected(selectedOption)
   }
   return (
-    <div className="fixed top-18 w-48 z-40">
+    <div className="  top-0 ml-64 w-48 z-40">
       <Listbox value={selected} onChange={handleSelect}>
         <div className="relative mt-1">
           <Listbox.Button className="relative w-full cursor-default  bg-white py-2 pl-3 pr-10 text-left  border focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">

@@ -5,6 +5,7 @@ import { hasPermission } from '../../lib/roles';
 import { Home, Users, Folder, FileText, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 import classNames from 'classnames';
+import {ConfigIcon, HomeIcon, UsersIcon} from "./icons";
 
 const menuItems = [
     {
@@ -30,6 +31,27 @@ const menuItems = [
     },
     {
         id: 3,
+        label: 'Collaborate',
+        icon: UsersIcon,
+        link: '/collaborate',
+        permission: 'colaborate',
+    },
+    {
+        id: 4,
+        label: 'Importer Configuration',
+        icon: ConfigIcon,
+        link: '/configuration',
+        permission: 'importer_configuration',
+    },
+    {
+        id: 5,
+        label: 'Imports',
+        icon: HomeIcon,
+        link: '/imports',
+        permission: 'view_imports',
+    },
+    {
+        id: 6,
         label: 'Libraries',
         icon: Folder,
         link: '/libraries',

@@ -1,4 +1,4 @@
-import getOpenRouterResponse from "../../../lib/gpt-engine";
+import { getAIResponseWithFallback } from "../../../lib/gpt-engine";
 
 export default async function ajvSchemaGenerator(req, res) {
   switch (req.method) {
@@ -15,9 +15,9 @@ export default async function ajvSchemaGenerator(req, res) {
         "required": ["id", "name", "email", "isActive"]
       }. Always respond with valid JSON. Never include explanations, markdown formatting, or code blocks. Return raw JSON only.`;
 
-      console.log('Calling getOpenRouterResponse with prompt:', actualPrompt);
-      let resp = await getOpenRouterResponse(actualPrompt, 2000, 0.7, 'ajvSchema');
-      console.log('Raw response from getOpenRouterResponse:', resp);
+      console.log('Calling getAIResponseWithFallback with prompt:', actualPrompt);
+      let resp = await getAIResponseWithFallback(actualPrompt, 2000, 0.7, 'ajvSchema');
+      // console.log('Raw response from Gemini API:', resp);
 
       try {
         let parsedResponse = JSON.parse(resp);

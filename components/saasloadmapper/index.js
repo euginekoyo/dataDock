@@ -1,25 +1,18 @@
-import React, {
-    useEffect,
-    useState,
-    useContext,
-    useCallback,
-    useRef,
-} from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import { Context } from '../../context';
+import React, {useCallback, useContext, useEffect, useRef, useState,} from 'react';
+import {AgGridReact} from 'ag-grid-react';
+import {Context} from '../../context';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import stringSimilarity from 'string-similarity';
 import axios from 'axios';
 import UploadProgress from '../uploadProgress';
-import { useRouter } from 'next/router';
+import {useRouter} from 'next/router';
 import MyModal from '../genericdialog';
 import CheckboxComponent from './CheckboxComponent';
-import { Tab } from '@headlessui/react';
+import {Tab} from '@headlessui/react';
 import classNames from 'classnames';
-import Link from 'next/link';
 import cuid from 'cuid';
-import { UploadCloud } from 'lucide-react';
+import {UploadCloud} from 'lucide-react';
 
 const columnMatcher = ({ saasTemplate, validationTemplate }) => {
     if (!saasTemplate || !validationTemplate) return;
@@ -133,21 +126,35 @@ const SassLoadMapper = () => {
     };
 
     const saveTemplate = () => {
+        // Check for duplicate labels
         let labels = state.curSaasLoadMapperTemplate
             .filter((el) => el.is_imported)
             .map((el) => el.label);
+
         if (new Set(labels).size !== labels.length) {
             setDuplicate(true);
             return;
         }
 
         setLoading(true);
-        let data = {
+
+        // Get and sanitize base file name
+        const originalName = state.curFile?.name || 'uploaded_file.csv';
+        const baseName = originalName.replace(/\.[^/.]+$/, ''); // Remove extension
+
+        const slugifiedName = baseName
+            .toLowerCase()
+            .replace(/\s+/g, '_')                   // spaces → underscores
+            .replace(/[^a-z0-9_-]/g, '');           // remove special characters
+
+        const fileName = `upload-${slugifiedName}-${cuid()}.csv`;
+
+        const data = {
             columns: state.curSaasLoadMapperTemplate.filter(
                 (el) => el.is_imported && el.label
             ),
             baseTemplateId: state.baseTemplateId,
-            fileName: state.curFile.name + cuid(),
+            fileName: fileName,
         };
         axios
             .post('/api/templates', data)

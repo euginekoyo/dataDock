@@ -1,20 +1,14 @@
-import { useEffect, useState } from 'react';
-import {
-  AttachToImporter,
-  AttachToOrganizations,
-  AttachToJSONOBJ,
-  AttachToWorkspace,
-  AttachWebHookURL,
-} from './index';
+import {useEffect, useState} from 'react';
+import {AttachToImporter, AttachToOrganizations, AttachToWorkspace,} from './index';
 import Link from 'next/link';
 import SuccessModal from '../common/SuccessModal';
 import SyntaxHighlighter from 'react-syntax-highlighter';
-import { googlecode } from 'react-syntax-highlighter/dist/cjs/styles/hljs';
-import { InformationCircleIcon } from '@heroicons/react/24/solid';
+import {googlecode} from 'react-syntax-highlighter/dist/cjs/styles/hljs';
+import {InformationCircleIcon} from '@heroicons/react/24/solid';
 import CopyToClipboard from 'react-copy-to-clipboard';
-import { DocumentDuplicateIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import {ChevronLeftIcon, DocumentDuplicateIcon} from '@heroicons/react/24/outline';
 import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
+import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const jsonOBJ = [
@@ -85,7 +79,11 @@ export default App;`);
         })
         .then((response) => {
           if ((response.status = 201))
-            setConfigurationData({ importerId: response.data.insertedId });
+            setConfigurationData({
+              importerId: response.data.insertedId,
+              templateId: attachToImporters.value, // ✅ ADD THIS
+
+            });
           setVisible(true);
         })
         .catch((err) => {
@@ -107,6 +105,7 @@ function App() {
         <br />
         <YoButton
             importId="${configurationData.importerId}"
+            templateId="${configurationData.templateId}"  
             yoHostUrl={"http://localhost:5050"}
         />
     </div>

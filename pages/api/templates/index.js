@@ -10,12 +10,14 @@ export default async function fetchTemplateRecords(req, res) {
     case 'GET':
       try {
         let query = {};
-        if (req.headers.template_id) {
-          // Validate template_id format
-          if (!/^[0-9a-fA-F]{24}$/.test(req.headers.template_id)) {
+        const templateId = req.query.template_id || req.headers.template_id;
+
+        if (templateId) {
+          if (!/^[0-9a-fA-F]{24}$/.test(templateId)) {
             return res.status(400).json({ error: 'Invalid template_id format' });
           }
-          query = { _id: new ObjectId(req.headers.template_id) }; // Use new ObjectId
+          query = { _id: new ObjectId(templateId) };
+          // Use new ObjectId
           const result = await db.collection('templates').findOne(query);
           if (!result) {
             return res.status(404).json({ error: 'Template not found' });

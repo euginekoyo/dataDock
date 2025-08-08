@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Plus, Trash2, Settings, Key, CheckCircle, AlertCircle, X } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
+import React, {useEffect, useState} from 'react';
+import {AlertCircle, CheckCircle, Key, Plus, Settings, Shield, Trash2, X} from 'lucide-react';
+import {useAuth} from '../context/AuthContext';
 
 const RoleManagement = () => {
     const { user, loading } = useAuth();
@@ -14,6 +14,7 @@ const RoleManagement = () => {
         'view_libraries',
         'manage_libraries',
         'custom_permission',
+        'view_imports', 'colaborate', 'importer_configuration'
     ]);
     const [newPermission, setNewPermission] = useState('');
     const [error, setError] = useState('');
