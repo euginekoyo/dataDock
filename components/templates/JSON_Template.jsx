@@ -309,7 +309,7 @@ const JSON_Template = () => {
                                                 )
                                             }
                                         >
-                                            <span className="mr-2">With DataDockAI</span>
+                                            <span className="mr-2">With DataFusionAI</span>
                                             <span
                                                 className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-red-500 text-white text-xs font-bold rounded-full">
                         BETA
@@ -325,7 +325,7 @@ const JSON_Template = () => {
                                                 )
                                             }
                                         >
-                                            Without DataDockAI
+                                            Without DataFusionAI
                                         </Tab>
                                     </Tab.List>
                                     <Tab.Panels>

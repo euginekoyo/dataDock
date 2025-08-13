@@ -353,7 +353,7 @@ const MainModel = ({ isOpen, closeModal, setTemplateData }) => {
                         onClick={openRegexModal}
                         className="rounded-md w-full border bg-white px-4 py-2 text-sm font-medium text-[#2c71b2] items-center dark:bg-gray-800 dark:text-white"
                       >
-                        Generate Regex With DataDockAI
+                        Generate Regex With DataFusionAI
                       </button>
 
                       <Transition appear show={regexModal} as={Fragment}>
@@ -415,7 +415,7 @@ const MainModel = ({ isOpen, closeModal, setTemplateData }) => {
                                         {isCustomRegex && (
                                           <>
                                             <p className="my-2 font-semibold text-center">
-                                              Using DataDockAI
+                                              Using DataFusionAI
                                               <div className="ml-2 inline-flex items-center px-1 justify-center text-xs font-bold text-white bg-red-500 rounded-full dark:border-gray-900">
                                                 BETA
                                               </div>
@@ -423,7 +423,7 @@ const MainModel = ({ isOpen, closeModal, setTemplateData }) => {
                                             <textarea
                                               rows="10"
                                               className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                              placeholder="Enter your prompt here for DataDockAI"
+                                              placeholder="Enter your prompt here for DataFusionAI"
                                               onChange={(e) =>
                                                 setPrompt(e.target.value)
                                               }

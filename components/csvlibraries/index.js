@@ -64,7 +64,7 @@ const MainBar = () => {
                 <p className="text-gray-500 dark:text-gray-300">
                     Prepare the CSVs and data then get it validated by creating a {""}
                     <Link href="/templatecreate#2">
-                        <span className='font-semibold cursor-pointer underline underline-offset-4'>DataDock template</span>
+                        <span className='font-semibold cursor-pointer underline underline-offset-4'>DataFusion template</span>
                     </Link>{" "}
                     before importing.
                 </p>

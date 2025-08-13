@@ -1,11 +1,11 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 import { hasPermission } from '../../lib/roles';
-import { Home, Users, Folder, FileText, ChevronLeft, LogOut, Loader2, Sparkles } from 'lucide-react';
+import { Home, Users, Folder, FileText, ChevronLeft, LogOut, Loader2, Sparkles, Settings, Briefcase, Clock } from 'lucide-react';
 import Link from 'next/link';
 import classNames from 'classnames';
-import {ConfigIcon, HomeIcon, UsersIcon} from "./icons";
 
 const menuItems = [
     {
@@ -32,23 +32,30 @@ const menuItems = [
     {
         id: 3,
         label: 'Collaboration Settings',
-        icon: UsersIcon,
+        icon: Settings,
         link: '/collaborate',
         permission: 'Collaboration_Settings',
     },
     {
         id: 4,
         label: 'Create Jobs',
-        icon: ConfigIcon,
+        icon: Briefcase,
         link: '/configuration',
         permission: 'Create_Jobs',
     },
     {
         id: 5,
         label: 'Pending Jobs',
-        icon: HomeIcon,
+        icon: Clock,
         link: '/imports',
         permission: 'Pending_Jobs',
+    },
+    {
+        id: 6,
+        label: 'Reconciled Transactions',
+        icon: FileText,
+        link: '/reconciled',
+        permission: 'view_reconciled_transactions',
     },
 ];
 
@@ -57,7 +64,7 @@ const PageLoader = ({ isVisible, message = "Signing out..." }) => {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="fixed inset-0 z-25 flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             {/* Animated background particles */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute w-96 h-96 -top-48 -left-48 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -156,7 +163,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const sidebarClasses = classNames(
-        'fixed left-0 top-0 h-screen flex flex-col transition-all duration-300 bg-gradient-to-b from-white via-gray-50 to-white border-r border-gray-200 shadow-xl backdrop-blur-sm z-30',
+        'fixed left-0 top-0 h-screen flex flex-col transition-all duration-300 bg-gradient-to-b from-white via-gray-50 to-white border-r border-gray-200 shadow-xl backdrop-blur-sm z-[-1]', // Explicit negative z-index
         {
             'w-64': !toggleCollapse,
             'w-16': toggleCollapse,
@@ -164,7 +171,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const overlayClasses = classNames(
-        'fixed inset-0 bg-black bg-opacity-40 transition-all duration-300 z-20 md:hidden backdrop-blur-sm',
+        'fixed inset-0 bg-black bg-opacity-40 transition-all duration-300 z-5 md:hidden backdrop-blur-sm', // Reduced from z-10
         {
             'opacity-100 visible': !toggleCollapse && isMobile,
             'opacity-0 invisible': toggleCollapse || !isMobile,
@@ -172,7 +179,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const collapseButtonClasses = classNames(
-        'absolute -right-3 top-6 z-40 p-2 rounded-full border-2 shadow-lg bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 hover:scale-110 group',
+        'absolute -right-3 top-6 z-15 p-2 rounded-full border-2 shadow-lg bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 hover:scale-110 group', // Reduced from z-30
         {
             'rotate-180': toggleCollapse,
         }
@@ -183,7 +190,7 @@ const Sidebar = ({ onToggle }) => {
         return classNames(
             'group relative flex items-center w-full px-4 py-3 rounded-xl transition-all duration-300 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 hover:shadow-sm hover:scale-[1.02] transform',
             {
-                'text-black shadow-lg scale-[1.02]': isActive,
+                'bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg scale-[1.02]': isActive,
                 'text-gray-700 hover:text-gray-900': !isActive,
             }
         );
@@ -202,7 +209,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const tooltipClasses = classNames(
-        'absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-50 shadow-xl',
+        'absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap z-20 shadow-xl', // Reduced from z-40
         'before:content-[""] before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:-translate-x-1 before:w-2 before:h-2 before:bg-gray-900 before:rotate-45'
     );
 
@@ -282,7 +289,12 @@ const Sidebar = ({ onToggle }) => {
                             'justify-start': !toggleCollapse,
                         })}
                     >
-
+                        <div className="relative group">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                                <span className="text-white font-bold text-lg">L</span>
+                                <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                            </div>
+                        </div>
                         <div
                             className={classNames('ml-4 transition-all duration-300 overflow-hidden', {
                                 'w-0 opacity-0': toggleCollapse,
@@ -338,7 +350,7 @@ const Sidebar = ({ onToggle }) => {
                                                 <span className={labelClasses}>{menu.label}</span>
 
                                                 {isActive && !toggleCollapse && (
-                                                    <div className="absolute right-4 w-2 h-2  rounded-full shadow-sm animate-pulse" />
+                                                    <div className="absolute right-4 w-2 h-2 bg-white rounded-full shadow-sm animate-pulse" />
                                                 )}
 
                                                 {toggleCollapse && (

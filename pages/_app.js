@@ -12,7 +12,7 @@ function MyApp({ Component, pageProps }) {
             <AuthProvider>
                 <Provider>
                     <Head>
-                        <title>DataDock</title>
+                        <title>DataFusion</title>
                     </Head>
                     <div className="main_container">
                         <Component {...pageProps} />

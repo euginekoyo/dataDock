@@ -67,7 +67,7 @@ const UserManagement = () => {
 
         fetchUsers();
         fetchRoles();
-    }, [user, loading]);
+    }, [user, loading,baseUrl]);
 
     const handleCreateUser = async (e) => {
         e.preventDefault();

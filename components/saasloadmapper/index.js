@@ -309,7 +309,7 @@ const SassLoadMapper = () => {
                                                     )
                                                 }
                                             >
-                                                <span>With DataDock-AI</span>
+                                                <span>With DataFusion-AI</span>
                                                 <div className="absolute inline-flex items-center px-1.5 py-0.5 text-xs font-bold text-white bg-red-500 rounded-full -top-1 -right-1">
                                                     BETA
                                                 </div>
@@ -324,7 +324,7 @@ const SassLoadMapper = () => {
                                                     )
                                                 }
                                             >
-                                                Without DataDock-AI
+                                                Without DataFusion-AI
                                             </Tab>
                                         </Tab.List>
                                     </div>

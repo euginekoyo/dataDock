@@ -32,8 +32,9 @@ export function EmailTemplate({ firstName, tempLink }: EmailTemplateProps) {
             </p>
             <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '30px 0' }} />
             <p style={{ fontSize: 12, color: '#999', textAlign: 'center' }}>
-                If you didn't expect this email, please contact support.
+                If you didn&apos;t expect this email, please contact support.
             </p>
+
         </div>
     );
 }

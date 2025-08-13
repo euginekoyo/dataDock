@@ -39,7 +39,7 @@ const Index = () => {
                   <BookOpen className="w-6 h-6 text-white" />
                 </div>
                 <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                  DataDock Libraries
+                  DataFusion Libraries
                 </h1>
               </div>
               <p className="text-gray-600 text-sm">Explore our collection of libraries for CSV preparation</p>

@@ -33,7 +33,7 @@ const SlidePanel = ({ data }) => {
         }`}
       >
         <h3 className="mt-10 text-4xl font-semibold text-white">
-          I am DataDockAssistant!
+          I am DataFusionAssistant!
         </h3>
         <p className="mt-10">Coming soon!</p>
         <p>{data}</p>

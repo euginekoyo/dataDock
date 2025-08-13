@@ -1,7 +1,7 @@
 import React from 'react';
 
 const YoRecommender = () => {
-  return <div>DataDock Recommender</div>;
+  return <div>DataFusion Recommender</div>;
 };
 
 export default YoRecommender;

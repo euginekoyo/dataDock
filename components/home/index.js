@@ -70,7 +70,7 @@ const Home = () => {
                             </svg>
                         </div>
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                            Welcome to DataDock!
+                            Welcome to DataFusion
                         </h1>
                     </div>
                     <p className="text-gray-600 text-sm">Effortlessly import and validate your CSV data</p>
@@ -82,7 +82,7 @@ const Home = () => {
                         <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
-                        DataDock Quick Walkthrough
+                        DataFusion Quick Walkthrough
                     </h2>
                     <p className="text-gray-600 text-sm text-center mb-4">
                         Demo of importing and validating a CSV with a pre-configured template
@@ -95,7 +95,7 @@ const Home = () => {
                                 <p className="text-xs text-gray-600">
                                     The template is pre-configured with the field values: id, name, email, date, status
                                 </p>
-                                <a href="/csv/DataDock_Data_Type_Validation.csv" download>
+                                <a href="/csv/DataFusion_Data_Type_Validation.csv" download>
                                     <button className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 text-xs">
                                         Download CSV
                                     </button>
