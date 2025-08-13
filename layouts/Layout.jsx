@@ -70,7 +70,7 @@ const Layout = ({ children }) => {
 
                 {/* Main content */}
                 <main className="flex-1 p-4">
-                    <div className="max-w-5xl mx-auto">
+                    <div >
                         {children}
                     </div>
                 </main>

@@ -14,6 +14,12 @@ const initialState = {
   saasTemplateSchema: {},
   isTemplateEditing: false,
   templateColumnToEdit: {},
+  // collection: null, // Added to align with SET_COLLECTION_NAME
+  template: null,   // Added to align with SET_CUR_TEMPLATE
+  curFile: null,    // Added to align with CURRENT_FILE
+  saasTemplateColumns: [], // Added to align with SET_SASS_TEMPLATE_COLUMNS
+  baseTemplateId: null,    // Added to align with SET_SASS_BASE_TEMPLATE_ID
+  curSaasLoadMapperTemplate: [],
 };
 
 // create context

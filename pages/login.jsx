@@ -115,12 +115,7 @@ export default function Login() {
             </button>
           </div>
 
-          {/* Footer */}
-          <div className="mt-8 text-center">
-            <a href="#" className="text-white/70 hover:text-white text-sm transition-colors">
-              Forgot your password?
-            </a>
-          </div>
+
         </div>
       </div>
   );

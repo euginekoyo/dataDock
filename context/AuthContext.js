@@ -76,7 +76,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify(user));
         setUser(user);
-        await router.push('/dashboard');
+        await router.push('/');
         console.log('AuthContext: Redirected to /dashboard');
         return { success: true };
       } else {
@@ -95,7 +95,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    router.push('/login');
+    // router.push('/login');
   };
 
   return (

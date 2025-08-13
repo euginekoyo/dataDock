@@ -11,10 +11,8 @@ const RoleManagement = () => {
         'manage_users',
         'view_templates',
         'manage_templates',
-        'view_libraries',
-        'manage_libraries',
         'custom_permission',
-        'view_imports', 'colaborate', 'importer_configuration'
+        'Pending_Jobs', 'Collaboration_Settings', 'Create_Jobs'
     ]);
     const [newPermission, setNewPermission] = useState('');
     const [error, setError] = useState('');

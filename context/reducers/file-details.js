@@ -7,6 +7,8 @@ export function fileDetails(state, action) {
       return { ...state, curFile: action.payload };
     case 'CURRENT_FILE_SIZE':
       return { ...state, fileSize: action.payload };
+    case 'SET_SAAS_TEMPLATE_SCHEMA':
+      return { ...state, saasTemplateSchema: action.payload };
     case 'CURRENT_FILE_HEADERS':
       return {
         ...state,

@@ -212,7 +212,7 @@ export default App;`);
                     onClick={handleClick}
                     className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg"
                 >
-                  Save & Generate
+                  Save
                 </button>
               </div>
             </div>
@@ -228,7 +228,7 @@ export default App;`);
             )}
 
             {/* Form and Code Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-1 gap-6">
               {/* Form Section */}
               <div className="space-y-6">
                 {/* Importer Name */}
@@ -285,58 +285,10 @@ export default App;`);
                       setAttachToWorkspace={setAttachToWorkspace}
                       workspaces={workspaces}
                   />
-                  {/*<AttachToJSONOBJ*/}
-                  {/*    attachThemeJSONObj={attachThemeJSONObj}*/}
-                  {/*    setAttachThemeJSONObj={setAttachThemeJSONObj}*/}
-                  {/*    jsonOBJ={jsonOBJ}*/}
-                  {/*    availiable={false}*/}
-                  {/*/>*/}
-                  {/*<AttachWebHookURL*/}
-                  {/*    attachWebHookURL={attachWebHookURL}*/}
-                  {/*    setAttachWebHookURL={setAttachWebHookURL}*/}
-                  {/*    availiable={false}*/}
-                  {/*/>*/}
+
                 </div>
               </div>
 
-              {/* Code Section */}
-              <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                  Generated Embed Code
-                </h2>
-                <div className="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                  <SyntaxHighlighter
-                      language="javascript"
-                      showLineNumbers={true}
-                      wrapLongLines={true}
-                      style={googlecode}
-                      className="text-sm"
-                  >
-                    {code}
-                  </SyntaxHighlighter>
-                </div>
-                <CopyToClipboard text={code} onCopy={() => toast.success('Code copied to clipboard!')}>
-                  <button className="mt-4 w-full inline-flex items-center justify-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg">
-                    <DocumentDuplicateIcon className="h-4 w-4 mr-2" />
-                    Copy Code
-                  </button>
-                </CopyToClipboard>
-                {error && (
-                    <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-r-xl mt-4">
-                      <div className="flex items-start">
-                        <InformationCircleIcon className="h-5 w-5 text-red-500 mt-0.5 mr-3" />
-                        <div>
-                          <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
-                            Missing Required Fields
-                          </h3>
-                          <p className="mt-1 text-sm text-red-700 dark:text-red-300">
-                            {error}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                )}
-              </div>
             </div>
           </div>
         </div>

@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     const token = jwt.sign(
         { userId: user._id.toString(), email: user.email, role: user.role },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: '8h' }
     );
 
     console.log('Login: Success', { userId: user._id.toString(), email, role: user.role });

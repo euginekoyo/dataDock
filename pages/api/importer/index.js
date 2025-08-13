@@ -3,13 +3,18 @@ let ObjectId = require('mongodb').ObjectId;
 
 export default async function importer(req, res) {
   const client = await clientPromise;
-  const db = client.db(process.env.DATABASE_NAME | 'DataDock');
+  const db = client.db(process.env.DATABASE_NAME || 'DataDock');
 
   switch (req.method) {
     case 'POST':
       try {
-        let { importerName, templateId, organizationId, workspaceId, templateName } =
-          req.body;
+        let { importerName, templateId, organizationId, workspaceId, templateName } = req.body;
+        // Validate workspaceId
+        const organization = await db.collection('organizations').findOne({ _id: new ObjectId(organizationId) });
+        if (!organization || !organization.workspaces.some(ws => ws.workspaceId.toString() === workspaceId)) {
+          return res.status(400).json({ error: 'Invalid workspaceId for the given organization' });
+        }
+
         let newImporter = {
           name: importerName,
           templateId: templateId,
@@ -23,7 +28,7 @@ export default async function importer(req, res) {
       } catch (err) {
         console.error(err.message);
         if (err.code === 11000) {
-          res.status(400).json({ error: 'Importer with this name already exists !' });
+          res.status(400).json({ error: 'Importer with this name already exists!' });
           break;
         }
         res.status(500).json({ error: 'failed to load data' });

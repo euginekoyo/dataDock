@@ -14,23 +14,7 @@ import { ModuleRegistry } from '@ag-grid-community/core';
 import tooltip from './tooltip';
 import { Context } from '../../context';
 import axios from 'axios';
-import Ajv from 'ajv';
-import addFormats from 'ajv-formats';
 import Stepper from '../stepper';
-import {
-  customBoolean,
-  customDateTime,
-  customThreeDigitNumber,
-  customNoGmailDomain,
-  validInternationalPhoneNumber,
-} from '../../lib/validation-engine';
-import {
-  BOOLEAN_FORMAT,
-  DATE_TIME_FORMAT,
-  NO_GMAIL_FORMAT,
-  PHONE_NUMBER_FORMAT,
-  THREE_DIGIT_NUMBER_FORMAT,
-} from '../../constants';
 import ReviewCsv from './reviewCsv';
 import Confetti from '../confetti';
 import { ajvCompileCustomValidator } from '../../lib/validation_util/yovalidator';
@@ -77,11 +61,138 @@ const GridExample = ({ version }) => {
   const [changedRowsIndex, setChangedRowsIndex] = useState([]);
   const [schema, setSchema] = useState({});
   const [autofixedlabels, setautofixedLabels] = useState([]);
-  let templateColumns = [];
-  let template = {};
-  let userSchema = {};
-  let recordsUri = `/api/meta/count?collection_name=${state.collection}`;
-  let errorCountUri = `/api/meta/errorcount?collection_name=${state.collection}`;
+  const [template, setTemplate] = useState({});
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+  // Memoized URIs to prevent unnecessary re-renders
+  const recordsUri = useMemo(() =>
+          `/api/meta/count?collection_name=${state.collection}`,
+      [state.collection]
+  );
+  const errorCountUri = useMemo(() =>
+          `/api/meta/errorcount?collection_name=${state.collection}`,
+      [state.collection]
+  );
+
+  // Validation functions defined before cellPassRules (CRITICAL)
+  const cellCheckBySchema = useCallback((field, value) => {
+    console.log('cellCheckBySchema called:', { field, value, schema: Object.keys(schema).length });
+
+    if (!field || value === undefined || value === null) return false;
+
+    let errorFlg = false;
+    let data = value;
+
+    // Handle different data types
+    if (typeof value === 'string' && value.trim() === '') {
+      data = '';
+    } else if (typeof value === 'string' && !isNaN(value) && value !== '') {
+      try {
+        data = JSON.parse(value);
+      } catch (e) {
+        // Keep as string if parsing fails
+        data = value;
+      }
+    }
+
+    // Use schema for validation
+    const schemaProps = schema.properties || {};
+    if (field in schemaProps && Object.keys(schema).length > 0) {
+      const fieldSchema = schemaProps[field];
+      console.log('Validating field:', field, 'with value:', data, 'against schema:', fieldSchema);
+
+      try {
+        const ajv = ajvCompileCustomValidator({ template });
+        const valid = ajv.validate(fieldSchema, data);
+        errorFlg = !valid;
+
+        if (!valid) {
+          console.log('Validation failed for:', field, 'errors:', ajv.errors);
+        }
+      } catch (e) {
+        console.error('Validation error:', e);
+        errorFlg = false;
+      }
+    }
+
+    console.log('cellCheckBySchema result:', { field, value, errorFlg });
+    return errorFlg;
+  }, [schema, template]);
+
+  const nullValCheckBySchema = useCallback((field, value) => {
+    console.log('nullValCheckBySchema called:', { field, value, schema: Object.keys(schema).length });
+
+    if (!field) return false;
+
+    let nullFlag = false;
+    if (value === undefined || value === null || value === '') {
+      const schemaRequired = schema.required || [];
+      if (schemaRequired.length && schemaRequired.includes(field)) {
+        nullFlag = true;
+        console.log('Null check failed for required field:', field);
+      }
+    }
+
+    console.log('nullValCheckBySchema result:', { field, value, nullFlag });
+    return nullFlag;
+  }, [schema]);
+
+  // cellPassRules defined AFTER validation functions with proper dependencies
+  const cellPassRules = useMemo(() => {
+    console.log('Creating cellPassRules with schema keys:', Object.keys(schema).length);
+    return {
+      'cell-fail': (params) => {
+        const result = cellCheckBySchema(params.colDef.field, params.value);
+        if (result) console.log('cell-fail rule triggered for:', params.colDef.field, params.value);
+        return result;
+      },
+      'null-check': (params) => {
+        const result = nullValCheckBySchema(params.colDef.field, params.value);
+        if (result) console.log('null-check rule triggered for:', params.colDef.field, params.value);
+        return result;
+      },
+      'cell-modified': (params) => {
+        const result = changedRowsIndex.includes(params.node.rowIndex);
+        if (result) console.log('cell-modified rule triggered for row:', params.node.rowIndex);
+        return result;
+      },
+    };
+  }, [cellCheckBySchema, nullValCheckBySchema, changedRowsIndex, schema]);
+
+  // Enhanced cell renderer with loading state handling
+  const cellRenderer = useCallback((props) => {
+    // Handle loading state properly
+    if (props.value === undefined) {
+      return <span className="cell-value empty-cell">Loading...</span>;
+    }
+
+    // Enhanced feedback parsing
+    let feedback;
+    try {
+      const feedbackObj = JSON.parse(props.data.feedback || '{}');
+      if (feedbackObj && Object.keys(feedbackObj).length > 0) {
+        feedback = feedbackObj[props.colDef.headerName];
+      }
+    } catch (e) {
+      // Silently handle parsing errors
+    }
+
+    return (
+        <div className="cell-content">
+          <span className="cell-value">{props.value}</span>
+          <div className="cell-indicators">
+            {feedback && (
+                <div className="feedback-indicator">
+                  <Info
+                      className="w-4 h-4 text-blue-500 hover:text-blue-700 transition-colors cursor-pointer"
+                      title={`AI Suggestion: ${feedback}`}
+                  />
+                </div>
+            )}
+          </div>
+        </div>
+    );
+  }, []);
 
   const getAiRecommendations = useCallback(() => {
     setLoadingSuggestions(true);
@@ -89,406 +200,371 @@ const GridExample = ({ version }) => {
         .then((res) => res.json())
         .then((data) => {
           setFeedbackData(data.data);
-          const rowCount = gridRef.current.api.getDisplayedRowCount();
+          const rowCount = gridRef.current?.api?.getDisplayedRowCount() || 0;
           for (let i = 0; i < rowCount; i++) {
             const rowNode = gridRef.current.api.getDisplayedRowAtIndex(i);
-            if (data.data[rowNode.data._id]) {
+            if (rowNode && data.data[rowNode.data._id]) {
               rowNode.setDataValue('feedback', JSON.stringify(data.data[rowNode.data._id]?.feedback || data.data[rowNode.data._id]?.Feedback));
             }
           }
-          gridRef.current.api.refreshCells({ force: true });
+          gridRef.current?.api?.refreshCells({ force: true });
+          setLoadingSuggestions(false);
+        })
+        .catch((error) => {
+          console.error('Error fetching AI recommendations:', error);
           setLoadingSuggestions(false);
         });
-  }, [state.collection, gridRef, setLoadingSuggestions]);
+  }, [state.collection]);
 
-  const showOnlyErrors = useCallback(
-      (enabled) => {
-        setErrorFilter(enabled);
-        if (enabled) {
-          const dataSource = {
-            rowCount: undefined,
-            getRows: async (params) => {
-              let url = `/api/meta?collection=${state.collection}&`;
-              url += `_start=${params.startRow}&_end=${params.endRow}`;
-              url += '&only_errors=true';
-              if (selectedErrorType && selectedErrorType != 'No selection') {
-                url += `&column_name=${selectedErrorType}`;
-              }
-              fetch(url)
-                  .then((httpResponse) => httpResponse.json())
-                  .then((response) => {
-                    params.successCallback(response.data, response.data.length);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                    params.failCallback();
-                  });
-            },
-          };
-          gridRef.current.api.setDatasource(dataSource);
-        } else {
-          gridRef.current.api.setDatasource(originalDataSource);
-        }
-      },
-      [originalDataSource, selectedErrorType, state.collection, feedbackData]
-  );
-
-  const runAutofix = (label) => {
-    if (gridRef?.current) {
-      const itemsToUpdate = [];
-      for (const row of autofixValues) {
-        if (row.field === label) {
-          const rowNode = gridRef.current.api.getDisplayedRowAtIndex(row.index);
-          const data = rowNode.data;
-          let oldValuesObj = rowNode.data._old || {};
-          oldValuesObj[row.field] = row.oldValue;
-          let correctionsObj = rowNode.data._corrections || {};
-          delete correctionsObj[row.field];
-          data._old = oldValuesObj;
-          data._corrections = correctionsObj;
-          data[row.field] = row.newValue || "";
-          itemsToUpdate.push(data);
-          setChangedRowsIndex((prev) => (prev.includes(row.index)) ? prev : prev.concat(row.index));
-        }
-      }
-      userSchema = schema;
-      autofixUpdateDb(itemsToUpdate, gridRef.current, label);
-      gridRef.current.api.applyTransaction({ update: itemsToUpdate });
-      gridRef.current.api.refreshCells({ force: true });
-      autofixedlabels.push(label);
-      setautofixedLabels([...autofixedlabels]);
+  const showOnlyErrors = useCallback((enabled) => {
+    setErrorFilter(enabled);
+    if (enabled) {
+      const dataSource = {
+        rowCount: undefined, // Keep undefined for error filtering
+        getRows: async (params) => {
+          let url = `/api/meta?collection=${state.collection}&_start=${params.startRow}&_end=${params.endRow}`;
+          url += '&only_errors=true';
+          if (selectedErrorType && selectedErrorType !== 'No selection') {
+            url += `&column_name=${selectedErrorType}`;
+          }
+          try {
+            const response = await fetch(url);
+            const data = await response.json();
+            params.successCallback(data.data, data.data.length);
+          } catch (error) {
+            console.error('Error fetching filtered data:', error);
+            params.failCallback();
+          }
+        },
+      };
+      gridRef.current?.api?.setDatasource(dataSource);
+    } else {
+      gridRef.current?.api?.setDatasource(originalDataSource);
     }
-  };
+  }, [originalDataSource, selectedErrorType, state.collection]);
 
-  const undoAutoFix = () => {
-    if (gridRef?.current) {
-      const itemsToUpdate = [];
-      for (const index of changedRowsIndex) {
-        const rowNode = gridRef.current.api.getDisplayedRowAtIndex(index);
-        const changedFields = rowNode.data._old ? Object.keys(rowNode.data._old) : [];
-        let correctionsObj = {};
-        let data = rowNode.data;
-        for (const field of changedFields) {
-          correctionsObj[field] = rowNode.data[field] || "";
-          data[field] = rowNode.data._old[field] || "";
-        }
+  const runAutofix = useCallback((label) => {
+    if (!gridRef?.current) return;
+
+    const itemsToUpdate = [];
+    for (const row of autofixValues) {
+      if (row.field === label) {
+        const rowNode = gridRef.current.api.getDisplayedRowAtIndex(row.index);
+        if (!rowNode) continue;
+
+        const data = rowNode.data;
+        const oldValuesObj = rowNode.data._old || {};
+        oldValuesObj[row.field] = row.oldValue;
+        const correctionsObj = rowNode.data._corrections || {};
+        delete correctionsObj[row.field];
+
+        data._old = oldValuesObj;
         data._corrections = correctionsObj;
+        data[row.field] = row.newValue || '';
         itemsToUpdate.push(data);
+
+        setChangedRowsIndex((prev) => (prev.includes(row.index) ? prev : [...prev, row.index]));
       }
-      gridRef.current.api.applyTransaction({ update: itemsToUpdate });
-      gridRef.current.api.refreshCells({ force: true });
-      setChangedRowsIndex([]);
     }
-  };
 
-  const autofixUpdateDb = (itemsToUpdate, params, label) => {
-    let dataToBeUpdated = [];
+    autofixUpdateDb(itemsToUpdate, gridRef.current, label);
+    gridRef.current.api.applyTransaction({ update: itemsToUpdate });
+    gridRef.current.api.refreshCells({ force: true });
 
-    const removeByKey = (arr, key) => {
-      const requiredIndex = arr.findIndex((el) => {
-        return el.key === String(key);
-      });
-      if (requiredIndex === -1) {
-        return false;
+    setautofixedLabels(prev => [...prev, label]);
+  }, [autofixValues]);
+
+  const undoAutoFix = useCallback(() => {
+    if (!gridRef?.current) return;
+
+    const itemsToUpdate = [];
+    for (const index of changedRowsIndex) {
+      const rowNode = gridRef.current.api.getDisplayedRowAtIndex(index);
+      if (!rowNode) continue;
+
+      const changedFields = rowNode.data._old ? Object.keys(rowNode.data._old) : [];
+      const correctionsObj = {};
+      const data = rowNode.data;
+
+      for (const field of changedFields) {
+        correctionsObj[field] = rowNode.data[field] || '';
+        data[field] = rowNode.data._old[field] || '';
       }
+      data._corrections = correctionsObj;
+      itemsToUpdate.push(data);
+    }
+
+    gridRef.current.api.applyTransaction({ update: itemsToUpdate });
+    gridRef.current.api.refreshCells({ force: true });
+    setChangedRowsIndex([]);
+  }, [changedRowsIndex]);
+
+  const autofixUpdateDb = useCallback((itemsToUpdate, params, label) => {
+    const dataToBeUpdated = [];
+    const removeByKey = (arr, key) => {
+      const requiredIndex = arr.findIndex((el) => el.key === String(key));
+      if (requiredIndex === -1) return false;
       return !!arr.splice(requiredIndex, 1);
     };
 
-    for (let item of itemsToUpdate) {
-      let dbupdate = cellCheckBySchema(label, item[label]);
+    for (const item of itemsToUpdate) {
+      const dbupdate = cellCheckBySchema(label, item[label]);
       if (!dbupdate) {
-        let obj = {};
-        obj.collection_id = state.collection;
-        let validation_Arr = [];
-        if (item && item.validationData) {
-          validation_Arr = item.validationData;
-          removeByKey(validation_Arr, label);
+        const obj = {
+          collection_id: state.collection,
+          data: { ...item }
+        };
+
+        let validationArr = [];
+        if (item?.validationData) {
+          validationArr = [...item.validationData];
+          removeByKey(validationArr, label);
         }
-        delete item.validationData;
-        obj.data = item;
-        obj.data.validationData = validation_Arr;
+
+        delete obj.data.validationData;
+        obj.data.validationData = validationArr;
         obj.data._id = item._id;
         dataToBeUpdated.push(obj);
       }
     }
-    let url = '/api/autofix';
-    axios
-        .post(url, dataToBeUpdated)
+
+    if (dataToBeUpdated.length === 0) return;
+
+    axios.post('/api/autofix', dataToBeUpdated)
+        .then(() => axios.get(errorCountUri))
         .then((res) => {
-          axios.get(errorCountUri).then((res) => {
-            setFileMetaData((prev) => {
-              return { ...prev, ...res.data };
-            });
-          });
+          setFileMetaData((prev) => ({ ...prev, ...res.data }));
         })
-        .catch((err) => console.log(err));
-  };
+        .catch((err) => console.error('Autofix error:', err));
+  }, [cellCheckBySchema, state.collection, errorCountUri]);
 
-  const openAutofixModal = () => {
-    if (gridRef?.current) {
-      let autofixArray = [];
-      gridRef.current.api.forEachNode((node) => {
-        let correctionList = Object.keys(node.data._corrections || {});
-        if (correctionList?.length > 0) {
-          for (const field of correctionList) {
-            autofixArray.push({ index: node.rowIndex, field: field, oldValue: node.data[field], newValue: node.data._corrections[field] || "" });
-          }
+  const openAutofixModal = useCallback(() => {
+    if (!gridRef?.current) return;
+
+    const autofixArray = [];
+    gridRef.current.api.forEachNode((node) => {
+      const correctionList = Object.keys(node.data._corrections || {});
+      if (correctionList?.length > 0) {
+        for (const field of correctionList) {
+          autofixArray.push({
+            index: node.rowIndex,
+            field: field,
+            oldValue: node.data[field],
+            newValue: node.data._corrections[field] || '',
+          });
         }
-      });
-      setAutofixValues(autofixArray);
-    }
-  };
-
-  useEffect(() => {
-    if (!selectedErrorType) return;
-    let currentColumnDefs = gridRef?.current?.api?.getColumnDefs();
-    if (Array.isArray(currentColumnDefs)) {
-      let newColumnDefs = currentColumnDefs.map((elem) => {
-        if (['feedback', 'corrections', 'old'].includes(elem.headerName)) {
-          elem.hide = true;
-        } else if (selectedErrorType === 'No selection' || elem.headerName === 'Row') {
-          elem.hide = false;
-        } else {
-          elem.hide = elem.headerName === selectedErrorType ? false : true;
-        }
-        return elem;
-      });
-      setColumnDefs(newColumnDefs);
-      showOnlyErrors(errorFilter);
-    }
-  }, [selectedErrorType, showOnlyErrors, errorFilter]);
-
-  const defaultColDef = useMemo(() => {
-    return {
-      flex: 1,
-      resizable: true,
-      minWidth: 100,
-      tooltipComponent: tooltip,
-      cellClass: 'modern-cell',
-      headerClass: 'modern-header',
-    };
+      }
+    });
+    setAutofixValues(autofixArray);
   }, []);
 
+  // Effect for error type changes
+  useEffect(() => {
+    if (!selectedErrorType || !gridRef?.current?.api) return;
+
+    const currentColumnDefs = gridRef.current.api.getColumnDefs();
+    if (!Array.isArray(currentColumnDefs)) return;
+
+    const newColumnDefs = currentColumnDefs.map((elem) => {
+      if (['feedback', 'corrections', 'old'].includes(elem.headerName)) {
+        return { ...elem, hide: true };
+      } else if (selectedErrorType === 'No selection' || elem.headerName === 'Row') {
+        return { ...elem, hide: false };
+      } else {
+        return { ...elem, hide: elem.headerName !== selectedErrorType };
+      }
+    });
+
+    setColumnDefs(newColumnDefs);
+    showOnlyErrors(errorFilter);
+  }, [selectedErrorType, showOnlyErrors, errorFilter]);
+
+  // Effect to refresh cells when schema or template changes (CRITICAL for error highlighting)
+  useEffect(() => {
+    if (gridRef?.current?.api && Object.keys(schema).length > 0) {
+      // Update column definitions to ensure cellClassRules are properly applied
+      const currentColumnDefs = gridRef.current.api.getColumnDefs();
+      if (Array.isArray(currentColumnDefs)) {
+        const updatedColumnDefs = currentColumnDefs.map((colDef) => {
+          if (colDef.field && colDef.field !== 'feedback' && colDef.field !== '_old' && colDef.field !== '_corrections' && colDef.headerName !== 'Row') {
+            return {
+              ...colDef,
+              cellClassRules: cellPassRules // Ensure cellClassRules are applied
+            };
+          }
+          return colDef;
+        });
+
+        gridRef.current.api.setColumnDefs(updatedColumnDefs);
+        // Force refresh all cells to apply new validation rules
+        setTimeout(() => {
+          gridRef.current.api.refreshCells({ force: true });
+        }, 100);
+      }
+    }
+  }, [schema, template, cellPassRules]);
+
+  const defaultColDef = useMemo(() => ({
+    flex: 1,
+    resizable: true,
+    minWidth: 100,
+    tooltipComponent: tooltip,
+    cellClass: 'modern-cell',
+    headerClass: 'modern-header',
+  }), []);
+
   const onShowLoading = useCallback(() => {
-    gridRef.current.api.showLoadingOverlay();
+    gridRef.current?.api?.showLoadingOverlay();
   }, []);
 
   const onLoadingHide = useCallback(() => {
-    gridRef.current.api.hideOverlay();
+    gridRef.current?.api?.hideOverlay();
   }, []);
 
-  const onGridReady = useCallback(
-      async (params) => {
-        let countOfRecords = 0;
-        const dataSchema = () => {
-          let schemaUrl = '/api/templates';
-          const headers = {
-            template_id: state.template,
-          };
-
-          fetch(schemaUrl, { headers })
-              .then((httpResponse) => httpResponse.json())
-              .then((response) => {
-                templateColumns = response.columns;
-                template = response;
-                userSchema = response.schema;
-                setSchema(response.schema);
-                setColumnDefs((prev) =>
-                    prev.concat(
-                        templateColumns.map((x) => {
-                          return {
-                            headerName: x.label,
-                            field: x.label,
-                            editable: true,
-                            cellClassRules: cellPassRules,
-                            tooltipField: x.label,
-                            hide: false,
-                            headerClass: 'modern-header',
-                            cellClass: 'modern-cell',
-                            cellRenderer: (props) => {
-                              if (props.value !== undefined) {
-                                let feedback;
-                                try {
-                                  let feedbackObj = JSON.parse(props.data.feedback || '{}');
-                                  if (feedbackObj) {
-                                    if (Object.keys(feedbackObj).length > 0) {
-                                      feedback = feedbackObj[props.colDef.headerName];
-                                    }
-                                  }
-                                } catch (e) {}
-                                onLoadingHide();
-                                return (
-                                    <div className="cell-content">
-                                      <span className="cell-value">{props.value}</span>
-                                      {feedback && (
-                                          <div className="feedback-indicator">
-                                            <Info
-                                                className="w-4 h-4 text-blue-500 hover:text-blue-700 transition-colors cursor-pointer"
-                                                title={`AI Suggestion: ${feedback}`}
-                                            />
-                                          </div>
-                                      )}
-                                    </div>
-                                );
-                              } else {
-                                return onShowLoading();
-                              }
-                            },
-                          };
-                        })
-                    )
-                );
-              });
-        };
-        dataSchema();
-
-        await axios
-            .get(recordsUri)
-            .then((res) => {
-              setFileMetaData(res.data);
-              countOfRecords = res.data.totalRecords;
-              axios
-                  .get(errorCountUri)
-                  .then((res) => {
-                    setFileMetaData((prev) => {
-                      return { ...prev, ...res.data };
-                    });
-                  })
-                  .catch((err) => console.log(err));
-            })
-            .catch((err) => console.log(err));
-
-        const dataSource = {
-          rowCount: undefined,
-          getRows: async (params) => {
-            let url = `/api/meta?collection=${state.collection}&`;
-            url += `_start=${params.startRow}&_end=${params.endRow}`;
-            fetch(url)
-                .then((httpResponse) => httpResponse.json())
-                .then((response) => {
-                  params.successCallback(response.data, countOfRecords);
-                })
-                .catch((error) => {
-                  console.error(error);
-                  params.failCallback();
-                });
-          },
-        };
-        params.api.setDatasource(dataSource);
-        setOriginalDataSource(dataSource);
-      },
-      [state.collection, selectedErrorType, feedbackData]
-  );
-
-  const cellPassRules = {
-    'cell-fail': (params) =>
-        cellCheckBySchema(params.colDef.field, params.value),
-    'null-check': (params) =>
-        nullValCheckBySchema(params.colDef.field, params.value),
-    'cell-modified': (params) =>
-        changedRowsIndex.includes(params.node.rowIndex),
-  };
-
-  const cellCheckBySchema = (field, value) => {
-    let flag = false;
-    let error_flg = false;
-    let data = value;
-
-    if (field && value) {
-      if (isNaN(value)) {
-        flag = true;
-      } else {
-        data = JSON.parse(value);
-      }
-
-      let schemaProps = userSchema.properties || schema.properties;
-
-      if (field in schemaProps) {
-        let fieldSchema = schemaProps[field];
-        let ajv = ajvCompileCustomValidator({ template });
-        let valid = ajv.validate(fieldSchema, data);
-        if (!valid) {
-          error_flg = true;
-        } else error_flg = false;
-      }
+  // Fixed onGridReady with proper async handling and column setup
+  const onGridReady = useCallback(async (params) => {
+    if (!state.collection || !state.template) {
+      console.error('Missing collection or template ID:', state);
+      params.api.showNoRowsOverlay();
+      return;
     }
 
-    return error_flg;
-  };
+    setIsInitialLoading(true);
+    onShowLoading();
 
-  const nullValCheckBySchema = (field, value) => {
-    let nullflag = false;
-    if (field && !value) {
-      let schemaRequired = userSchema.required || schema.required || [];
-      if (schemaRequired.length) {
-        if (schemaRequired.includes(field)) nullflag = true;
+    try {
+      // Fetch template data first (CRITICAL for validation setup)
+      const templateResponse = await fetch('/api/templates', {
+        headers: { template_id: state.template }
+      });
+
+      if (!templateResponse.ok) {
+        throw new Error('Failed to fetch template');
       }
-    }
-    return nullflag;
-  };
 
-  const onCellValueChanged = useCallback((params) => {
-    let dbupdate = false;
-    if (params.oldValue !== params.newValue) {
-      let column = params.column.colDef.field;
+      const templateData = await templateResponse.json();
 
-      dbupdate = cellCheckBySchema(column, params.newValue);
-      const removeByKey = (arr, key) => {
-        const requiredIndex = arr.findIndex((el) => {
-          return el.key === String(key);
-        });
-        if (requiredIndex === -1) {
-          return false;
-        }
-        return !!arr.splice(requiredIndex, 1);
+      if (!templateData || !Array.isArray(templateData.columns)) {
+        console.error('Invalid template data:', templateData);
+        params.api.showNoRowsOverlay();
+        return;
+      }
+
+      // Set template and schema FIRST (critical for validation)
+      setTemplate(templateData);
+      setSchema(templateData.schema || {});
+
+      // Create column definitions with cellClassRules applied
+      const templateColumns = templateData.columns
+          .filter(x => x.label !== 'errors') // Filter out the errors column
+          .map((x) => ({
+            headerName: x.label,
+            field: x.label,
+            editable: true,
+            cellClassRules: cellPassRules, // Apply the validation rules
+            tooltipField: x.label,
+            hide: false,
+            headerClass: 'modern-header',
+            cellClass: 'modern-cell',
+            cellRenderer: cellRenderer,
+          }));
+
+      // Update column definitions
+      setColumnDefs((prev) => [...prev, ...templateColumns]);
+
+      // Fetch metadata
+      const [metaCountResponse, errorCountResponse] = await Promise.all([
+        axios.get(recordsUri),
+        axios.get(errorCountUri),
+      ]);
+
+      setFileMetaData({
+        ...metaCountResponse.data,
+        ...errorCountResponse.data,
+      });
+
+      const countOfRecords = metaCountResponse.data.totalRecords;
+
+      // Create data source
+      const dataSource = {
+        rowCount: countOfRecords,
+        getRows: async (params) => {
+          const url = `/api/meta?collection=${state.collection}&_start=${params.startRow}&_end=${params.endRow}`;
+          try {
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            params.successCallback(data.data, countOfRecords);
+          } catch (error) {
+            console.error('Error fetching grid data:', error);
+            params.failCallback();
+          }
+        },
       };
 
-      if (!dbupdate) {
-        let obj = {};
-        obj.collection_id = state.collection;
-        let validation_Arr = [];
-        if (params.data && params.data.validationData) {
-          validation_Arr = params.data.validationData;
-          removeByKey(validation_Arr, column);
-        }
-        delete params.data.validationData;
-        obj.data = params.data;
-        obj.data.validationData = validation_Arr;
-        obj.data._id = params.data._id;
+      params.api.setDatasource(dataSource);
+      setOriginalDataSource(dataSource);
 
-        let url = '/api/update';
-        params.column.colDef.cellStyle = { backgroundColor: '' };
-        params.api.refreshCells({
-          force: true,
-          columns: [column],
-          rowNodes: [params.node],
-        });
+      // Force refresh after everything is set up to ensure error highlighting works
+      setTimeout(() => {
+        params.api.refreshCells({ force: true });
+      }, 100);
 
-        axios
-            .post(url, obj)
-            .then((res) => {
-              axios.get(errorCountUri).then((res) => {
-                setFileMetaData((prev) => {
-                  return { ...prev, ...res.data };
-                });
-              });
-            })
-            .catch((err) => console.log(err));
-      } else {
-        params.column.colDef.cellStyle = {
-          backgroundColor: 'rgb(254 242 242)',
-          borderLeft: '3px solid rgb(239 68 68)',
-        };
-        params.api.refreshCells({
-          force: true,
-          columns: [column],
-          rowNodes: [params.node],
-        });
-      }
+    } catch (error) {
+      console.error('Error in onGridReady:', error);
+      params.api.showNoRowsOverlay();
+    } finally {
+      setIsInitialLoading(false);
+      onLoadingHide();
     }
-  }, []);
+  }, [state.collection, state.template, cellPassRules, cellRenderer, recordsUri, errorCountUri]);
 
-  const customLoadingTemplate = `
+  const onCellValueChanged = useCallback((params) => {
+    if (params.oldValue === params.newValue) return;
+
+    const column = params.column.colDef.field;
+    const dbUpdate = cellCheckBySchema(column, params.newValue);
+
+    const removeByKey = (arr, key) => {
+      const requiredIndex = arr.findIndex((el) => el.key === String(key));
+      if (requiredIndex === -1) return false;
+      return !!arr.splice(requiredIndex, 1);
+    };
+
+    if (!dbUpdate) {
+      const obj = {
+        collection_id: state.collection,
+        data: { ...params.data }
+      };
+
+      let validationArr = [];
+      if (params.data?.validationData) {
+        validationArr = [...params.data.validationData];
+        removeByKey(validationArr, column);
+      }
+
+      delete obj.data.validationData;
+      obj.data.validationData = validationArr;
+      obj.data._id = params.data._id;
+
+      // Clear error styling by refreshing cells
+      params.api.refreshCells({ force: true, columns: [column], rowNodes: [params.node] });
+
+      axios.post('/api/update', obj)
+          .then(() => axios.get(errorCountUri))
+          .then((res) => {
+            setFileMetaData((prev) => ({ ...prev, ...res.data }));
+          })
+          .catch((err) => console.error('Update error:', err));
+    } else {
+      // Refresh to show error styling through cellClassRules
+      params.api.refreshCells({ force: true, columns: [column], rowNodes: [params.node] });
+    }
+  }, [cellCheckBySchema, errorCountUri, state.collection]);
+
+  const customLoadingTemplate = useMemo(() => `
     <div class="custom-loading-overlay">
       <div class="loading-content">
         <div class="loading-spinner">
@@ -503,7 +579,7 @@ const GridExample = ({ version }) => {
         </div>
       </div>
     </div>
-  `;
+  `, []);
 
   return (
       <>
@@ -574,29 +650,43 @@ const GridExample = ({ version }) => {
             white-space: nowrap;
           }
 
-          .feedback-indicator {
+          .cell-value.empty-cell {
+            color: #9ca3af;
+            font-style: italic;
+          }
+
+          .cell-indicators {
+            display: flex;
+            align-items: center;
+            gap: 4px;
             margin-left: 6px;
             flex-shrink: 0;
           }
 
+          .feedback-indicator {
+            display: flex;
+            align-items: center;
+          }
+
+          /* CRITICAL: Error highlighting styles - these must match the cellClassRules names */
           .ag-cell.cell-fail {
-            background: #fef2f2;
-            border-left: 3px solid #ef4444;
-            color: #dc2626;
+            background: #fef2f2 !important;
+            border-left: 3px solid #ef4444 !important;
+            color: #dc2626 !important;
             font-weight: 500;
           }
 
           .ag-cell.null-check {
-            background: #fffbeb;
-            border-left: 3px solid #f59e0b;
-            color: #d97706;
+            background: #fffbeb !important;
+            border-left: 3px solid #f59e0b !important;
+            color: #d97706 !important;
             font-weight: 500;
           }
 
           .ag-cell.cell-modified {
-            background: #f0fdf4;
-            border-left: 3px solid #22c55e;
-            color: #16a34a;
+            background: #f0fdf4 !important;
+            border-left: 3px solid #22c55e !important;
+            color: #16a34a !important;
             font-weight: 500;
           }
 
@@ -689,6 +779,13 @@ const GridExample = ({ version }) => {
               <div className="p-4">
                 <div className="flex items-center justify-between">
                   <div>
+                    <a
+                        href={"/imports"}
+                        className="inline-flex items-center px-3 py-1.5 mb-3 rounded-lg font-medium text-xs text-purple-600 bg-purple-50 border border-purple-100 hover:bg-purple-100 hover:border-purple-200 transition-all duration-200 transform hover:scale-105"
+                    >
+                      {/*<Sparkles className="w-3 h-3 mr-1" />*/}
+                      Back
+                    </a>
                     <div className="flex items-center gap-2 mb-1">
                       <div className="p-1.5 bg-blue-600 rounded-lg">
                         <Info className="w-6 h-6 text-white" />
@@ -749,24 +846,26 @@ const GridExample = ({ version }) => {
                       ref={gridRef}
                       columnDefs={columnDefs}
                       defaultColDef={defaultColDef}
-                      rowBuffer={0}
+                      rowBuffer={10}
                       rowSelection={'single'}
                       rowModelType={'infinite'}
                       cacheBlockSize={100}
                       cacheOverflowSize={2}
-                      maxConcurrentDatasourceRequests={1}
-                      infiniteInitialRowCount={1000}
+                      maxConcurrentDatasourceRequests={3}
+                      infiniteInitialRowCount={100}
                       maxBlocksInCache={10}
-                      tooltipShowDelay={0}
-                      tooltipHideDelay={999999}
+                      tooltipShowDelay={500}
+                      tooltipHideDelay={2000}
                       onCellValueChanged={onCellValueChanged}
                       onGridReady={onGridReady}
                       rowHeight={32}
                       headerHeight={32}
-                      animateRows={true}
-                      enableRangeSelection={true}
+                      animateRows={false}
                       suppressMovableColumns={true}
                       overlayLoadingTemplate={customLoadingTemplate}
+                      suppressRowClickSelection={true}
+                      suppressCellFocus={false}
+                      enableCellTextSelection={true}
                   />
                 </div>
               </div>

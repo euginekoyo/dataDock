@@ -4,8 +4,8 @@ import axios from 'axios';
 import { PlusIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline';
 
 const MainBar = () => {
-    const [templates, setTemplates] = useState();
-    const [templateId, setTemplateId] = useState();
+    const [templates, setTemplates] = useState([]);
+    const [templateId, setTemplateId] = useState(null);
 
     useEffect(() => {
         axios
@@ -24,158 +24,162 @@ const MainBar = () => {
     const handleDelete = (tId) => {
         axios
             .delete(`/api/templates?template_id=${tId}`)
-            .then((res) => {
+            .then(() => {
                 axios.get('/api/templates').then((res) => {
-                    setTemplates(res.data.filter((el) => el['template_name']));
+                    setTemplates(
+                        res.data.filter((el) => el['template_name'])
+                    );
                 });
             })
             .catch((e) => console.log(e));
     };
 
     return (
-        <div className="h-full bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
             {/* Delete Confirmation Modal */}
-            <dialog
-                id="confirmDeleteModal"
-                className="modal modal-bottom sm:modal-middle backdrop-blur-sm"
-            >
-                <form method="dialog" className="modal-box bg-white border border-blue-100 shadow-md rounded-xl p-4">
-                    <button
-                        className="absolute top-2 right-2 p-1 rounded-md hover:bg-blue-50 transition-colors duration-200"
-                        data-dismiss="modal"
-                    >
-                        <XMarkIcon className="w-4 h-4 text-gray-500" aria-hidden="true" />
-                    </button>
-
-                    <div className="text-center pt-2">
-                        <div className="mx-auto flex items-center justify-center h-8 w-8 rounded-full bg-red-50 mb-3">
-                            <TrashIcon className="h-4 w-4 text-red-500" />
-                        </div>
-                        <h3 className="text-sm font-semibold text-gray-900 mb-1">
+            <dialog id="confirmDeleteModal" className="modal modal-bottom sm:modal-middle">
+                <div className="modal-box bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
+                    <form method="dialog">
+                        <button
+                            className="absolute top-4 right-4 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            data-dismiss="modal"
+                        >
+                            <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
+                        </button>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                             Delete Template
                         </h3>
-                        <p className="text-xs text-gray-600 mb-4">
+                        <p className="py-4 text-sm text-gray-500 dark:text-gray-400">
                             Are you sure you want to delete this template configuration? This action cannot be undone.
                         </p>
-                    </div>
-
-                    <div className="modal-action justify-center gap-2">
-                        <button
-                            className="px-4 py-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors duration-200 text-xs font-semibold"
-                            type="button"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-1.5 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg text-xs font-semibold"
-                            onClick={() => handleDelete(templateId)}
-                        >
-                            Delete
-                        </button>
-                    </div>
-                </form>
+                        <div className="modal-action flex justify-end space-x-2">
+                            <button
+                                className="inline-flex items-center px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+                                type="button"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white font-medium rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg"
+                                onClick={() => handleDelete(templateId)}
+                            >
+                                Delete
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </dialog>
 
-            <div className="p-6 max-w-5xl mx-auto">
-                {/* Header Section */}
-                <div className="flex items-center justify-between mb-6">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <div className="p-1.5 bg-blue-600 rounded-lg">
-                                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                            </div>
-                            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+            {/* Header Section */}
+            <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
+                <div className="max-w-7xl mx-auto px-6 py-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-xl font-bold text-gray-900 dark:text-white">
                                 Templates
                             </h1>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Manage your template configurations
+                            </p>
                         </div>
-                        <p className="text-gray-600 text-sm">
-                            Manage your template configurations
-                        </p>
-                    </div>
-
-                    <Link href={`/templatecreate`}>
-                        <button
-                            type="button"
-                            className="group flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg px-4 py-2 shadow-md hover:shadow-lg transition-all duration-300 text-xs"
-                        >
-                            <PlusIcon className="w-4 h-4 transition-transform group-hover:rotate-90 duration-200" />
-                            Create Template
-                        </button>
-                    </Link>
-                </div>
-
-                {/* Templates Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {templates &&
-                        templates.map((obj, idx) => (
-                            <div
-                                className="group bg-white rounded-xl shadow-md border border-blue-100 transition-all duration-300 hover:transform hover:scale-105 overflow-hidden"
-                                key={idx}
+                        <Link href="/templatecreate">
+                            <button
+                                type="button"
+                                className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg"
                             >
-                                {/* Card Header */}
-                                <div className="p-4 border-b border-blue-50">
-                                    <div className="flex items-start justify-between">
-                                        <Link href={`/templates/${obj._id}`}>
-                                            <h2 className="text-sm font-semibold text-blue-600 hover:text-blue-800 cursor-pointer transition-colors duration-200 line-clamp-2">
-                                                {obj.template_name}
-                                            </h2>
-                                        </Link>
-                                        <button
-                                            className="p-1 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                            onClick={() => {
-                                                window.confirmDeleteModal.showModal();
-                                                setTemplateId(obj._id);
-                                            }}
-                                        >
-                                            <TrashIcon className="h-4 w-4" />
-                                        </button>
-                                    </div>
-                                </div>
-
-                                {/* Card Footer */}
-                                <div className="p-4 bg-blue-50/30">
-                                    <div className="flex gap-2">
-                                        <Link href={`/templates/testtemplate/${obj._id}`} className="flex-1">
-                                            <button
-                                                type="button"
-                                                className="w-full bg-white text-blue-600 font-semibold py-1.5 px-3 border border-blue-100 rounded-lg hover:bg-blue-50 transition-colors duration-200 shadow-sm hover:shadow-md text-xs"
-                                            >
-                                                Preview
-                                            </button>
-                                        </Link>
-                                        <Link href={`/templates/${obj._id}`} className="flex-1">
-                                            <button
-                                                type="button"
-                                                className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-1.5 px-3 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md text-xs"
-                                            >
-                                                View
-                                            </button>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                                <PlusIcon className="h-4 w-4 mr-2" />
+                                Create Template
+                            </button>
+                        </Link>
+                    </div>
                 </div>
+            </div>
 
-                {/* Empty State */}
-                {templates && templates.length === 0 && (
-                    <div className="text-center py-12">
-                        <div className="mx-auto h-12 w-12 text-blue-300 mb-3">
+            {/* Main Content */}
+            <div className="max-w-7xl mx-auto px-6 py-8">
+                {templates && templates.length > 0 ? (
+                    <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                        <table className="min-w-full divide-y divide-gray-200/50 dark:divide-gray-700/50">
+                            <thead className="bg-gray-50/50 dark:bg-gray-900/50">
+                            <tr>
+                                <th
+                                    scope="col"
+                                    className="px-6 py-3 text-left text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Template Name
+                                </th>
+                                <th
+                                    scope="col"
+                                    className="px-6 py-3 text-right text-xs font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider"
+                                >
+                                    Actions
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200/50 dark:divide-gray-700/50">
+                            {templates.map((obj, idx) => (
+                                <tr
+                                    key={idx}
+                                    className="hover:bg-gray-50/30 dark:hover:bg-gray-800/30 transition-colors duration-200"
+                                >
+                                    <td className="px-6 py-4 whitespace-nowrap">
+                                        <Link href={`/templates/${obj._id}`}>
+                                                <span className="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 cursor-pointer transition-colors duration-200">
+                                                    {obj.template_name}
+                                                </span>
+                                        </Link>
+                                    </td>
+                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <div className="flex justify-end space-x-2">
+                                            <Link href={`/templates/testtemplate/${obj._id}`}>
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-sm"
+                                                >
+                                                    Preview
+                                                </button>
+                                            </Link>
+                                            <Link href={`/templates/${obj._id}`}>
+                                                <button
+                                                    type="button"
+                                                    className="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-200 font-medium rounded-xl border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200"
+                                                >
+                                                    View
+                                                </button>
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                className="p-2 rounded-full hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+                                                onClick={() => {
+                                                    window.confirmDeleteModal.showModal();
+                                                    setTemplateId(obj._id);
+                                                }}
+                                            >
+                                                <TrashIcon className="h-5 w-5 text-red-500 hover:text-red-700" />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                ) : (
+                    <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
+                        <div className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-3">
                             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
                         </div>
-                        <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                             No templates yet
                         </h3>
-                        <p className="text-xs text-gray-600 mb-3">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
                             Get started by creating your first template
                         </p>
-                        <Link href={`/templatecreate`}>
-                            <button className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold rounded-lg px-4 py-2 transition-all duration-200 shadow-md hover:shadow-lg text-xs">
-                                <PlusIcon className="w-4 h-4" />
+                        <Link href="/templatecreate">
+                            <button className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg">
+                                <PlusIcon className="h-4 w-4 mr-2" />
                                 Create Template
                             </button>
                         </Link>

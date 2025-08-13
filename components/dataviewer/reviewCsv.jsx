@@ -249,6 +249,7 @@ const ReviewCsv = ({
                     </button>
                 )}
               </div>
+
               <div className="flex flex-wrap gap-2">
                 <button
                     onClick={undoAutoFix}
@@ -264,6 +265,7 @@ const ReviewCsv = ({
                   <Sparkles className="w-3 h-3 mr-1" />
                   Auto Fix
                 </button>
+
                 {metaData && metaData.totalRecords > 0 && !downloadig.all ? (
                     <button
                         onClick={() => onBtnExport(false, 'all')}

@@ -2,46 +2,72 @@ import { useState, useEffect } from 'react';
 import { TrashIcon, InformationCircleIcon } from '@heroicons/react/24/solid';
 import axios from 'axios';
 import SuccessModal from '../common/SuccessModal';
+import { useAuth } from '../../context/AuthContext'; // Adjust the import path
 
 const CollaborateComponent = () => {
   const [orgName, setOrgName] = useState('');
   const [workspaceName, setWorkspaceName] = useState('');
   const [collaborators, setCollaborators] = useState([]);
-  const [name, setName] = useState('');
+  const [selectedRole, setSelectedRole] = useState('');
+  const [roles, setRoles] = useState([]);
+  const [error, setError] = useState('');
   const [isVisible, setVisible] = useState(false);
   const [warning, setWarning] = useState(false);
   const [alreadyPresentError, setAlreadyPresentError] = useState(false);
 
-  function validateEmail(email) {
-    const re = /\S+@\S+\.\S+/;
-    return re.test(email);
-  }
+  const { user, loading } = useAuth(); // Access authenticated user and loading state
+
+  // Fetch roles
+  const fetchRoles = async () => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/roles`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRoles(data || []);
+        if (data.length > 0) {
+          setSelectedRole(data[0].name); // Set default selected role
+        }
+      } else {
+        setError('Failed to fetch roles');
+      }
+    } catch (error) {
+      console.error(error);
+      setError('An error occurred while fetching roles');
+      setRoles([{ name: 'USER', permissions: [] }]); // Fallback role
+    }
+  };
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
 
   const handleAdd = (e) => {
     e.preventDefault();
-    if (!validateEmail(name)) {
-      alert('Please enter a valid email');
-    } else {
-      if (collaborators.includes(name)) {
-        setAlreadyPresentError(true);
-        return;
-      }
-      setCollaborators([...collaborators, name]);
+    if (!selectedRole) {
+      alert('Please select a valid role');
+      return;
     }
-    setName('');
+    if (collaborators.includes(selectedRole)) {
+      setAlreadyPresentError(true);
+      return;
+    }
+    setCollaborators([...collaborators, selectedRole]);
+    setSelectedRole(''); // Reset the selection
   };
 
   const handleClick = (e) => {
     e.preventDefault();
-    if (!orgName || !workspaceName || !collaborators) {
+    if (!orgName || !workspaceName || collaborators.length === 0) {
       setWarning(true);
       return;
     }
     axios
-        .post('/api/collaborate', {
+        .post(`${process.env.NEXT_PUBLIC_API_URL}/api/collaborate`, {
           orgName,
           workspaceName,
-          collaborators,
+          collaborators, // Contains roles
         })
         .then((response) => {
           setVisible(true);
@@ -101,10 +127,10 @@ const CollaborateComponent = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    Create an Organization <span className="text-red-500">*</span>
+                    Create a Branch <span className="text-red-500">*</span>
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    The Organization Name to identify your organization
+                    The Branch Name to identify your Branch
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -176,39 +202,49 @@ const CollaborateComponent = () => {
                     Add Collaborators <span className="text-red-500">*</span>
                   </h2>
                   <p className="text-sm text-gray-500 dark:text-gray-400">
-                    The Collaborators to add to your workspace
+                    Select roles to add as collaborators to your workspace
                   </p>
                 </div>
                 <div className="space-y-2">
                   {collaborators.length < 1 && (
                       <div className="flex items-center space-x-2 text-sm text-red-500">
                         <InformationCircleIcon className="h-4 w-4" />
-                        <span>Please add at least one collaborator</span>
+                        <span>Please add at least one role</span>
                       </div>
                   )}
                   {alreadyPresentError && (
                       <div className="flex items-center space-x-2 text-sm text-red-500">
                         <InformationCircleIcon className="h-4 w-4" />
-                        <span>This user is already a collaborator</span>
+                        <span>This role is already a collaborator</span>
+                      </div>
+                  )}
+                  {error && (
+                      <div className="flex items-center space-x-2 text-sm text-red-500">
+                        <InformationCircleIcon className="h-4 w-4" />
+                        <span>{error}</span>
                       </div>
                   )}
                   <div className="flex gap-4">
-                    <input
-                        type="email"
-                        value={name}
-                        className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-0 bg-white/50 dark:bg-gray-700/50 ${
-                            alreadyPresentError
-                                ? 'border-red-300 focus:border-red-500'
-                                : 'border-gray-200 focus:border-blue-500 dark:border-gray-600 dark:focus:border-blue-400'
-                        } text-gray-900 dark:text-white placeholder-gray-400`}
-                        placeholder="Enter Collaborator Email Here..."
-                        onChange={(evt) => {
+                    <select
+                        value={selectedRole}
+                        onChange={(e) => {
                           setAlreadyPresentError(false);
                           setWarning(false);
-                          setName(evt.target.value);
+                          setSelectedRole(e.target.value);
                         }}
-                        required
-                    />
+                        className={`flex-1 px-4 py-3 rounded-xl border-2 transition-all duration-200 focus:outline-none focus:ring-0 bg-white/50 dark:bg-gray-700/50 ${
+                            alreadyPresentError || error
+                                ? 'border-red-300 focus:border-red-500'
+                                : 'border-gray-200 focus:border-blue-500 dark:border-gray-600 dark:focus:border-blue-400'
+                        } text-gray-900 dark:text-white`}
+                    >
+                      <option value="">Select a Role...</option>
+                      {roles.map((role) => (
+                          <option key={role.name} value={role.name}>
+                            {role.name}
+                          </option>
+                      ))}
+                    </select>
                     <button
                         type="button"
                         className="inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-xl hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg"
@@ -250,15 +286,15 @@ const CollaborateComponent = () => {
                     No Collaborators Added
                   </li>
               )}
-              {collaborators.map((collaborator, index) => (
+              {collaborators.map((role, index) => (
                   <li
                       key={index}
                       className="flex justify-between items-center text-gray-900 dark:text-gray-200 text-sm"
                   >
-                    <span>{collaborator}</span>
+                    <span>{role}</span>
                     <button
                         className="inline-flex items-center px-3 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/30 transition-colors"
-                        onClick={() => handleDelete(collaborator)}
+                        onClick={() => handleDelete(role)}
                     >
                       <TrashIcon className="h-4 w-4 mr-1" />
                       Remove
