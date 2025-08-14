@@ -8,7 +8,7 @@ const RoleManagement = () => {
     const [newRole, setNewRole] = useState({ name: '', permissions: [] });
     const [permissionsList, setPermissionsList] = useState([
         'view_dashboard',
-        'manage_users',
+        'manage_users','manage_roles',
         'view_templates',
         'manage_templates',
         'custom_permission',

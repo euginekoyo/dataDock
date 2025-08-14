@@ -44,12 +44,32 @@ export default function Dashboard() {
             const checkPermissions = async () => {
                 setIsCheckingPermissions(true);
                 console.log('Dashboard: Fetching permissions for role', user.role);
-                const perms = await hasPermission(user.role);
-                console.log('Dashboard permissions:', perms);
-                setPermissions(perms);
+                // Use hasPermission to check a base permission and fetch role details
+                const result = await hasPermission(user.role, 'view_dashboard');
+                console.log('Dashboard permissions check result:', result);
+                if (result.status === 200 && result.hasPerm) {
+                    // Fetch full role details to get all permissions
+                    const permsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/roles/public`, {
+                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+                    });
+                    if (permsResponse.ok) {
+                        const roles = await permsResponse.json();
+                        const role = roles.find(r => r.name === user.role);
+                        setPermissions(role?.permissions || []);
+                        console.log('Fetched permissions:', role?.permissions);
+                    } else {
+                        setPermissions([]);
+                    }
+                } else {
+                    setPermissions([]); // No access or error
+                }
                 setIsCheckingPermissions(false);
             };
-            checkPermissions();
+            checkPermissions().catch((error) => {
+                console.error('Error checking permissions:', error);
+                setPermissions([]);
+                setIsCheckingPermissions(false);
+            });
         } else {
             console.log('Dashboard: No user, skipping permission check');
             setPermissions([]);
@@ -62,8 +82,9 @@ export default function Dashboard() {
         if (user && permissions.length > 0) {
             const fetchStats = async () => {
                 try {
-                    // Fetch users count if has permission
-                    if (permissions.includes('manage_users') || permissions.includes('view_users')) {
+                    const manageUsersPerm = await hasPermission(user.role, 'manage_users');
+                    const viewUsersPerm = await hasPermission(user.role, 'view_users');
+                    if (manageUsersPerm.hasPerm || viewUsersPerm.hasPerm) {
                         const usersResponse = await fetch('/api/users', {
                             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                         });
@@ -77,8 +98,9 @@ export default function Dashboard() {
                         }
                     }
 
-                    // Fetch roles count if has permission
-                    if (permissions.includes('manage_roles') || permissions.includes('view_roles')) {
+                    const manageRolesPerm = await hasPermission(user.role, 'manage_roles');
+                    const viewRolesPerm = await hasPermission(user.role, 'view_roles');
+                    if (manageRolesPerm.hasPerm || viewRolesPerm.hasPerm) {
                         const rolesResponse = await fetch('/api/roles', {
                             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                         });
@@ -94,7 +116,6 @@ export default function Dashboard() {
                     console.error('Error fetching stats:', error);
                 }
             };
-
             fetchStats();
         }
     }, [user, permissions]);
@@ -147,7 +168,6 @@ export default function Dashboard() {
     const WelcomeSection = () => {
         const currentHour = new Date().getHours();
         const greeting = currentHour < 12 ? 'Good morning' : currentHour < 18 ? 'Good afternoon' : 'Good evening';
-
         return (
             <div className="bg-purple-900 via-blue-700 to-blue-800 rounded-xl shadow-lg p-6 mb-6 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-white opacity-5 rounded-full transform translate-x-16 -translate-y-16"></div>
@@ -158,7 +178,6 @@ export default function Dashboard() {
                             {greeting}, {user.name}!
                         </h1>
                     </div>
-
                     <div className="flex items-center gap-4 text-xs">
                         <div className="flex items-center gap-1">
                             <CheckCircle className="w-3 h-3 text-green-300" />
@@ -208,7 +227,6 @@ export default function Dashboard() {
                     )}
                 </div>
             )}
-
             {/* Quick Actions */}
             <div className="bg-white rounded-xl shadow-md border border-blue-100 p-6">
                 <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -252,9 +270,8 @@ export default function Dashboard() {
                     )}
                 </div>
             </div>
-
             {/* No Permissions Message */}
-            {!hasManageUsers && !hasManageRoles && (
+            {!hasManageUsers && !hasManageRoles && hasViewAccess && (
                 <div className="bg-white rounded-xl shadow-md border border-blue-100 p-8 text-center">
                     <AlertCircle className="w-12 h-12 text-blue-300 mx-auto mb-3" />
                     <h2 className="text-lg font-semibold text-gray-700 mb-1">Limited Access</h2>
@@ -274,9 +291,8 @@ export default function Dashboard() {
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
                 <div className="p-6 max-w-5xl mx-auto">
                     <WelcomeSection />
-
                     {/* Navigation Tabs */}
-                    {navigationTabs.length > 1 && (
+                    {navigationTabs.length > 0 && (
                         <div className="mb-6">
                             <div className="bg-white rounded-xl shadow-md border border-blue-100 p-1.5">
                                 <nav className="flex space-x-1.5">
@@ -301,7 +317,6 @@ export default function Dashboard() {
                             </div>
                         </div>
                     )}
-
                     {/* Content Area */}
                     <div className="space-y-6">
                         {activeTab === 'overview' && <OverviewContent />}
@@ -318,7 +333,6 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-
             <style jsx>{`
                 @keyframes fadeIn {
                     from { opacity: 0; transform: translateY(20px); }

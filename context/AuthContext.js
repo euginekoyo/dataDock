@@ -32,10 +32,8 @@ export const AuthProvider = ({ children }) => {
           },
         });
 
-        console.log('AuthContext: /api/auth/me response status', response.status);
         if (response.ok) {
           const userData = await response.json();
-          console.log('AuthContext: User data fetched', userData);
           setUser(userData);
           localStorage.setItem('user', JSON.stringify(userData));
         } else {
@@ -95,7 +93,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    // router.push('/login');
+    router.push('/login');
   };
 
   return (

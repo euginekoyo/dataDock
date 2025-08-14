@@ -5,15 +5,12 @@ import { ObjectId } from 'mongodb';
 export default async function userActivity(req, res) {
     let client;
     try {
-        console.log(`Processing ${req.method} request to /api/user-activity`);
         client = await clientPromise;
         const db = client.db(process.env.DATABASE_NAME || 'DataDock');
-        console.log('Connected to MongoDB database:', process.env.DATABASE_NAME || 'DataDock');
 
         // Check if user_activity collection exists
         const collections = await db.listCollections({ name: 'user_activity' }).toArray();
         const collectionExists = collections.length > 0;
-        console.log('user_activity collection exists:', collectionExists);
 
         const expectedValidator = {
             $jsonSchema: {
@@ -36,7 +33,6 @@ export default async function userActivity(req, res) {
                     validationLevel: 'strict',
                     validationAction: 'error'
                 });
-                console.log('Successfully created user_activity collection');
             } catch (createErr) {
                 console.error('Failed to create user_activity collection:', createErr.message);
                 return res.status(500).json({ error: 'Failed to create user_activity collection', details: createErr.message });
@@ -45,10 +41,8 @@ export default async function userActivity(req, res) {
             // Verify validator
             const collectionInfo = await db.listCollections({ name: 'user_activity' }).toArray();
             const currentValidator = collectionInfo[0]?.options?.validator;
-            console.log('Current validator:', JSON.stringify(currentValidator, null, 2));
 
             if (!currentValidator || JSON.stringify(currentValidator) !== JSON.stringify(expectedValidator)) {
-                console.log('Updating user_activity validator to match expected schema');
                 try {
                     await db.command({
                         collMod: 'user_activity',
@@ -84,11 +78,9 @@ export default async function userActivity(req, res) {
                         row_id: row_id && ObjectId.isValid(row_id) ? new ObjectId(row_id) : null,
                         timestamp: new Date()
                     };
-                    console.log('Inserting activity document:', activity);
 
                     try {
                         const result = await db.collection('user_activity').insertOne(activity);
-                        console.log('Inserted activity:', result.insertedId);
                         res.json({ success: true, activityId: result.insertedId });
                     } catch (insertErr) {
                         console.error('Insertion error:', insertErr);
@@ -107,7 +99,6 @@ export default async function userActivity(req, res) {
             case 'GET':
                 try {
                     const { collection_name } = req.query;
-                    console.log('GET query:', { collection_name });
                     const query = collection_name ? { collection_name } : {};
 
                     const activities = await db
@@ -145,7 +136,6 @@ export default async function userActivity(req, res) {
                         ])
                         .toArray();
 
-                    console.log('Retrieved activities:', activities.length);
                     res.json({ status: 200, data: activities });
                 } catch (err) {
                     console.error('Error in GET:', err.message);
