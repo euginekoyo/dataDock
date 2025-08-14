@@ -1,4 +1,3 @@
-
 import clientPromise from '../../../lib/mongodb';
 import { ObjectId } from 'mongodb';
 
@@ -19,11 +18,13 @@ export default async function userActivity(req, res) {
                 properties: {
                     userId: { bsonType: 'objectId' },
                     collection_name: { bsonType: 'string' },
+                    workspace: { bsonType: ['string', 'null'] }, // Made optional
+                    organization: { bsonType: ['string', 'null'] }, // Made optional
                     action: { bsonType: 'string' },
                     row_id: { bsonType: ['objectId', 'null'] },
-                    timestamp: { bsonType: 'date' }
-                }
-            }
+                    timestamp: { bsonType: 'date' },
+                },
+            },
         };
 
         if (!collectionExists) {
@@ -31,7 +32,7 @@ export default async function userActivity(req, res) {
                 await db.createCollection('user_activity', {
                     validator: expectedValidator,
                     validationLevel: 'strict',
-                    validationAction: 'error'
+                    validationAction: 'error',
                 });
             } catch (createErr) {
                 console.error('Failed to create user_activity collection:', createErr.message);
@@ -48,7 +49,7 @@ export default async function userActivity(req, res) {
                         collMod: 'user_activity',
                         validator: expectedValidator,
                         validationLevel: 'strict',
-                        validationAction: 'error'
+                        validationAction: 'error',
                     });
                     console.log('Successfully updated user_activity validator');
                 } catch (modErr) {
@@ -61,8 +62,7 @@ export default async function userActivity(req, res) {
         switch (req.method) {
             case 'POST':
                 try {
-                    const { userId, collection_name, action, row_id } = req.body;
-                    console.log('POST payload:', { userId, collection_name, action, row_id });
+                    const { userId, collection_name, workspace, organization, action, row_id } = req.body;
 
                     if (!userId || !ObjectId.isValid(userId)) {
                         return res.status(400).json({ error: 'Invalid or missing userId' });
@@ -74,9 +74,11 @@ export default async function userActivity(req, res) {
                     const activity = {
                         userId: new ObjectId(userId),
                         collection_name,
+                        workspace: workspace || 'default_workspace',
+                        organization: organization || 'default_organization',
                         action,
                         row_id: row_id && ObjectId.isValid(row_id) ? new ObjectId(row_id) : null,
-                        timestamp: new Date()
+                        timestamp: new Date(),
                     };
 
                     try {
@@ -116,7 +118,7 @@ export default async function userActivity(req, res) {
                             { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
                             {
                                 $group: {
-                                    _id: { userId: '$userId', collection_name: '$collection_name' ,action:'$action'},
+                                    _id: { userId: '$userId', collection_name: '$collection_name', workspace: '$workspace', organization: '$organization', action: '$action' },
                                     userName: { $first: { $ifNull: ['$user.name', 'Unknown'] } },
                                     lastActivity: { $max: '$timestamp' },
                                     actionCount: { $sum: 1 },
@@ -126,6 +128,8 @@ export default async function userActivity(req, res) {
                                 $project: {
                                     userId: '$_id.userId',
                                     collection_name: '$_id.collection_name',
+                                    workspace: '$_id.workspace',
+                                    organization: '$_id.organization',
                                     action: '$_id.action',
                                     userName: 1,
                                     lastActivity: 1,
@@ -133,6 +137,7 @@ export default async function userActivity(req, res) {
                                     _id: 0,
                                 },
                             },
+                            { $sort: { lastActivity: -1 } },
                         ])
                         .toArray();
 

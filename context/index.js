@@ -20,6 +20,8 @@ const initialState = {
   saasTemplateColumns: [], // Added to align with SET_SASS_TEMPLATE_COLUMNS
   baseTemplateId: null,    // Added to align with SET_SASS_BASE_TEMPLATE_ID
   curSaasLoadMapperTemplate: [],
+  workspaceName: null,     // Added for workspace
+  orgName: null,
 };
 
 // create context

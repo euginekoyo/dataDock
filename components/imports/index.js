@@ -31,8 +31,7 @@ const ImportsComponent = () => {
   const [deleting, setDeleting] = useState(null);
   const [viewModal, setViewModal] = useState({ show: false, item: null });
 
-  const { dispatch } = useContext(Context);
-  const router = useRouter();
+  const { state, dispatch } = useContext(Context);  const router = useRouter();
   const { user } = useAuth();
   const abortControllerRef = useRef(new AbortController());
 
@@ -132,15 +131,25 @@ const ImportsComponent = () => {
   const handleRowClick = useCallback(
       async (col) => {
         if (col.status === 'Incomplete') {
-          const templateId = col.template_id || col.baseTemplateId;
-          const collectionName = col.collection_name;
-          if (!templateId || !collectionName) {
-            console.error('Missing template_id or collection_name:', col);
+          if (!col.collection_name || (!col.template_id && !col.baseTemplateId)) {
+            console.error('Invalid import data:', col);
             return;
           }
+          const templateId = col.template_id || col.baseTemplateId;
+          const collectionName = col.collection_name;
+          const workspaceName = col.workspaceName || 'default_workspace';
+          const orgName = col.orgName || 'default_organization';
+
+          console.log('Handling row click:', { collectionName, templateId, workspaceName, orgName });
+
           dispatch({ type: 'SET_COLLECTION_NAME', payload: collectionName });
           dispatch({ type: 'SET_CUR_TEMPLATE', payload: templateId });
           dispatch({ type: 'CURRENT_FILE', payload: { path: col.fileName } });
+          dispatch({ type: 'SET_WORKSPACE_NAME', payload: workspaceName });
+          dispatch({ type: 'SET_ORG_NAME', payload: orgName });
+
+          console.log('Dispatched to context:', { collectionName, templateId, workspaceName, orgName, state });
+
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/templates`, {
               headers: { template_id: templateId },
@@ -152,27 +161,55 @@ const ImportsComponent = () => {
             if (data && data.schema) {
               dispatch({ type: 'SET_SAAS_TEMPLATE_SCHEMA', payload: data.schema });
             }
+            // Log activity
+            const activityPayload = {
+              userId: user._id,
+              collection_name: collectionName,
+              workspace: workspaceName,
+              organization: orgName,
+              action: 'view_import',
+              row_id: null,
+            };
+            console.log('Sending to /api/userActivity (handleRowClick):', activityPayload);
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/userActivity`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+              body: JSON.stringify(activityPayload),
+            });
           } catch (error) {
-            console.error('Error fetching template data:', error);
+            console.error('Error fetching template data or logging activity:', error);
           }
           router.push({ pathname: '/dataviewer/saas' }, undefined, { shallow: true });
         }
       },
-      [dispatch, router]
+      [dispatch, router, user]
   );
 
   const handleCleanNow = useCallback(
       async (col) => {
         if (col.status === 'Incomplete') {
-          const templateId = col.template_id || col.baseTemplateId;
-          const collectionName = col.collection_name;
-          if (!templateId || !collectionName) {
-            console.error('Missing template_id or collection_name:', col);
+          if (!col.collection_name || (!col.template_id && !col.baseTemplateId)) {
+            console.error('Invalid import data:', col);
             return;
           }
+          const templateId = col.template_id || col.baseTemplateId;
+          const collectionName = col.collection_name;
+          const workspaceName = col.workspaceName || 'default_workspace';
+          const orgName = col.orgName || 'default_organization';
+
+          console.log('Handling clean now:', { collectionName, templateId, workspaceName, orgName });
+
           dispatch({ type: 'SET_COLLECTION_NAME', payload: collectionName });
           dispatch({ type: 'SET_CUR_TEMPLATE', payload: templateId });
           dispatch({ type: 'CURRENT_FILE', payload: { path: col.fileName } });
+          dispatch({ type: 'SET_WORKSPACE_NAME', payload: workspaceName });
+          dispatch({ type: 'SET_ORG_NAME', payload: orgName });
+
+          console.log('Dispatched to context:', { collectionName, templateId, workspaceName, orgName, state });
+
           try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/templates`, {
               headers: { template_id: templateId },
@@ -184,13 +221,31 @@ const ImportsComponent = () => {
             if (data && data.schema) {
               dispatch({ type: 'SET_SAAS_TEMPLATE_SCHEMA', payload: data.schema });
             }
+            // Log activity
+            const activityPayload = {
+              userId: user._id,
+              collection_name: collectionName,
+              workspace: workspaceName,
+              organization: orgName,
+              action: 'clean_data',
+              row_id: null,
+            };
+            console.log('Sending to /api/userActivity (handleCleanNow):', activityPayload);
+            await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/userActivity`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+              },
+              body: JSON.stringify(activityPayload),
+            });
           } catch (error) {
-            console.error('Error fetching template data:', error);
+            console.error('Error fetching template data or logging activity:', error);
           }
           router.push({ pathname: '/dataviewer/saas' }, undefined, { shallow: true });
         }
       },
-      [dispatch, router]
+      [dispatch, router, user]
   );
 
   const handleDelete = useCallback(

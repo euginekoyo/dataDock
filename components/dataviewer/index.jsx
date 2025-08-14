@@ -86,7 +86,7 @@ const GridExample = ({ version }) => {
     const [autofixedlabels, setautofixedLabels] = useState([]);
     const [template, setTemplate] = useState({});
     const [isInitialLoading, setIsInitialLoading] = useState(true);
-
+    const [error, setError] = useState(null);
     const recordsUri = useMemo(
         () => `/api/meta/count?collection_name=${state.collection}`,
         [state.collection]
@@ -387,31 +387,31 @@ const GridExample = ({ version }) => {
         [cellCheckBySchema, state.collection, errorCountUri, user]
     );
 
-    const resolveRow = useCallback(
-        (data, node) => {
-            if (!data || !data._id) return;
-
-            const updateObj = {
-                collection_id: state.collection,
-                data: { ...data, validationData: [], resolved: true },
-                userId: user?._id, // Include userId for activity tracking
-            };
-            updateObj.data._id = data._id;
-
-            axios
-                .post('/api/update', [updateObj])
-                .then(() => {
-                    node.setData({ ...data, validationData: [], resolved: true });
-                    gridRef.current.api.refreshCells({ force: true, rowNodes: [node] });
-                    return axios.get(errorCountUri);
-                })
-                .then((res) => {
-                    setFileMetaData((prev) => ({ ...prev, ...res.data }));
-                })
-                .catch((err) => console.error('Resolve error:', err));
-        },
-        [state.collection, errorCountUri, user]
-    );
+    // const resolveRow = useCallback(
+    //     (data, node) => {
+    //         if (!data || !data._id) return;
+    //
+    //         const updateObj = {
+    //             collection_id: state.collection,
+    //             data: { ...data, validationData: [], resolved: true },
+    //             userId: user?._id, // Include userId for activity tracking
+    //         };
+    //         updateObj.data._id = data._id;
+    //
+    //         axios
+    //             .post('/api/update', [updateObj])
+    //             .then(() => {
+    //                 node.setData({ ...data, validationData: [], resolved: true });
+    //                 gridRef.current.api.refreshCells({ force: true, rowNodes: [node] });
+    //                 return axios.get(errorCountUri);
+    //             })
+    //             .then((res) => {
+    //                 setFileMetaData((prev) => ({ ...prev, ...res.data }));
+    //             })
+    //             .catch((err) => console.error('Resolve error:', err));
+    //     },
+    //     [state.collection, errorCountUri, user]
+    // );
 
     const openAutofixModal = useCallback(() => {
         if (!gridRef?.current) return;
@@ -598,9 +598,71 @@ const GridExample = ({ version }) => {
         [state.collection, state.template, cellPassRules, cellRenderer, recordsUri, errorCountUri]
     );
 
+    const resolveRow = useCallback(
+        (data, node) => {
+            if (!data || !data._id) {
+                console.error('Invalid data or missing _id:', data);
+                setError('Invalid data. Please try again.');
+                return;
+            }
+
+            if (!state.collection || !user?._id) {
+                console.error('Missing required context or user data:', {
+                    collection: state.collection,
+                    userId: user?._id,
+                    workspaceName: state.workspaceName,
+                    orgName: state.orgName,
+                });
+                setError('Missing required context or user data.');
+                return;
+            }
+
+            // Exclude _id from data
+            const { _id, ...updateData } = data;
+            const updateObj = {
+                collection_id: state.collection,
+                data: { ...updateData, validationData: [], resolved: true },
+                userId: user._id,
+                workspace: state.workspaceName || 'default_workspace',
+                organization: state.orgName || 'default_organization',
+            };
+            updateObj.data._id = _id;
+
+            console.log('Sending to /api/update (resolveRow):', updateObj);
+
+            axios
+                .post('/api/update', [updateObj])
+                .then(() => {
+                    node.setData({ ...data, validationData: [], resolved: true });
+                    gridRef.current.api.refreshCells({ force: true, rowNodes: [node] });
+                    return axios.get(errorCountUri);
+                })
+                .then((res) => {
+                    setFileMetaData((prev) => ({ ...prev, ...res.data }));
+                    setError(null); // Clear error on success
+                })
+                .catch((err) => {
+                    console.error('Resolve error:', err);
+                    setError('Failed to update record. Please try again.');
+                });
+        },
+        [state.collection, state.workspaceName, state.orgName, user, errorCountUri]
+    );
+
     const onCellValueChanged = useCallback(
         (params) => {
             if (params.oldValue === params.newValue) return;
+
+            if (!state.collection || !user?._id) {
+                console.error('Missing required context or user data:', {
+                    collection: state.collection,
+                    userId: user?._id,
+                    workspaceName: state.workspaceName,
+                    orgName: state.orgName,
+                });
+                setError('Missing required context or user data.');
+                return;
+            }
 
             const column = params.column.colDef.field;
             const dbUpdate = cellCheckBySchema(column, params.newValue);
@@ -612,10 +674,13 @@ const GridExample = ({ version }) => {
             };
 
             if (!dbUpdate) {
+                const { _id, ...updateData } = params.data;
                 const obj = {
                     collection_id: state.collection,
-                    data: { ...params.data },
-                    userId: user?._id, // Include userId for activity tracking
+                    data: { ...updateData },
+                    userId: user._id,
+                    workspace: state.workspaceName || 'default_workspace',
+                    organization: state.orgName || 'default_organization',
                 };
 
                 let validationArr = [];
@@ -624,9 +689,10 @@ const GridExample = ({ version }) => {
                     removeByKey(validationArr, column);
                 }
 
-                delete obj.data.validationData;
                 obj.data.validationData = validationArr;
-                obj.data._id = params.data._id;
+                obj.data._id = _id;
+
+                console.log('Sending to /api/update (onCellValueChanged):', obj);
 
                 params.api.refreshCells({ force: true, columns: [column], rowNodes: [params.node] });
 
@@ -635,13 +701,17 @@ const GridExample = ({ version }) => {
                     .then(() => axios.get(errorCountUri))
                     .then((res) => {
                         setFileMetaData((prev) => ({ ...prev, ...res.data }));
+                        setError(null); // Clear error on success
                     })
-                    .catch((err) => console.error('Update error:', err));
+                    .catch((err) => {
+                        console.error('Update error:', err);
+                        setError('Failed to update record. Please try again.');
+                    });
             } else {
                 params.api.refreshCells({ force: true, columns: [column], rowNodes: [params.node] });
             }
         },
-        [cellCheckBySchema, errorCountUri, state.collection, user]
+        [cellCheckBySchema, errorCountUri, state.collection, state.workspaceName, state.orgName, user]
     );
 
     const customLoadingTemplate = useMemo(
@@ -855,7 +925,7 @@ const GridExample = ({ version }) => {
             `}</style>
 
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-                <div className="p-6 max-w-5xl mx-auto">
+                <div className="p-6 w-full mx-auto">
                     <div className="bg-white rounded-xl shadow-md border border-blue-100 mb-6">
                         <div className="p-4">
                             <div className="flex items-center justify-between">

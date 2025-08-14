@@ -32,7 +32,6 @@ export default function Dashboard() {
     });
 
     useEffect(() => {
-        console.log('Dashboard user:', { user, loading });
         if (!loading && !user) {
             console.log('Dashboard: No user, redirecting to /login');
             router.push('/login');
@@ -43,10 +42,8 @@ export default function Dashboard() {
         if (user) {
             const checkPermissions = async () => {
                 setIsCheckingPermissions(true);
-                console.log('Dashboard: Fetching permissions for role', user.role);
                 // Use hasPermission to check a base permission and fetch role details
                 const result = await hasPermission(user.role, 'view_dashboard');
-                console.log('Dashboard permissions check result:', result);
                 if (result.status === 200 && result.hasPerm) {
                     // Fetch full role details to get all permissions
                     const permsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/roles/public`, {
@@ -56,7 +53,6 @@ export default function Dashboard() {
                         const roles = await permsResponse.json();
                         const role = roles.find(r => r.name === user.role);
                         setPermissions(role?.permissions || []);
-                        console.log('Fetched permissions:', role?.permissions);
                     } else {
                         setPermissions([]);
                     }
@@ -66,12 +62,10 @@ export default function Dashboard() {
                 setIsCheckingPermissions(false);
             };
             checkPermissions().catch((error) => {
-                console.error('Error checking permissions:', error);
                 setPermissions([]);
                 setIsCheckingPermissions(false);
             });
         } else {
-            console.log('Dashboard: No user, skipping permission check');
             setPermissions([]);
             setIsCheckingPermissions(false);
         }

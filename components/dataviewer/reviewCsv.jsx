@@ -143,7 +143,7 @@ const ReviewCsv = ({
         `}</style>
 
         <div className="mb-2 bg-gradient-to-br from-blue-50 via-white to-blue-50 ">
-          <div className="bg-white border border-blue-100 rounded-xl shadow-md p-4 max-w-5xl mx-auto">
+          <div className="bg-white border border-blue-100 rounded-xl shadow-md p-4 w-full mx-auto">
             {/* Header Section (Optional - Placeholder for future title or info) */}
             <div className="mb-6">
               <h2 className="text-lg font-semibold text-gray-900">CSV Review</h2>

@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
       }
 
       const token = localStorage.getItem('token');
-      console.log('AuthContext: Checking token', token ? 'Present' : 'Not found');
       if (!token) {
         console.log('AuthContext: No token found in localStorage');
         setUser(null);
