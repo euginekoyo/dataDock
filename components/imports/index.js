@@ -446,7 +446,7 @@ const ImportsComponent = () => {
                   Date
                 </th>
                 <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Organization</th>
+                <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Branch</th>
                 <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">WorkSpace</th>
                 <th className="text-left py-4 px-6 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
               </tr>
@@ -530,7 +530,7 @@ const ImportsComponent = () => {
                                       handleCleanNow(col);
                                     }}
                                     icon={Edit}
-                                    label="Clean"
+                                    label="Resolve"
                                     variant="purple"
                                 />
                             )}

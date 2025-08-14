@@ -1,5 +1,6 @@
+
 import clientPromise from '../../../lib/mongodb';
-let ObjectId = require('mongodb').ObjectId;
+import { ObjectId } from 'mongodb';
 
 export default async function fetchTemplateRecords(req, res) {
   const client = await clientPromise;
@@ -8,7 +9,7 @@ export default async function fetchTemplateRecords(req, res) {
   switch (req.method) {
     case 'GET':
       try {
-        let results = await db
+        const results = await db
             .collection('templates')
             .find({ collection_name: { $exists: true } })
             .toArray();
@@ -16,13 +17,18 @@ export default async function fetchTemplateRecords(req, res) {
         for (const item of results) {
           if (!item.collection_name) continue;
 
-          const recordsCount = await db
-              .collection(item.collection_name)
-              .countDocuments({});
-
-          const validData = await db
-              .collection(item.collection_name)
-              .countDocuments({ 'validationData.0': { $exists: false } });
+          const [recordsCount, validData, errorCount] = await Promise.all([
+            db.collection(item.collection_name).countDocuments({}),
+            db.collection(item.collection_name).countDocuments({ 'validationData.0': { $exists: false } }),
+            db
+                .collection(item.collection_name)
+                .aggregate([
+                  { $unwind: { path: '$validationData', preserveNullAndEmptyArrays: true } },
+                  { $group: { _id: '$validationData.key', count: { $sum: 1 } } },
+                  { $match: { _id: { $ne: null } } },
+                ])
+                .toArray(),
+          ]);
 
           const importerDetails = await db
               .collection('importers')
@@ -33,7 +39,6 @@ export default async function fetchTemplateRecords(req, res) {
             item.orgId = importerDetails.organizationId;
             item.workspaceId = importerDetails.workspaceId;
 
-            // Fetch organization details
             const organization = await db
                 .collection('organizations')
                 .findOne({ _id: new ObjectId(importerDetails.organizationId) });
@@ -58,38 +63,39 @@ export default async function fetchTemplateRecords(req, res) {
             item.collaborators = [];
           }
 
-          item.rows = validData;
-          item.status = (recordsCount === validData) ? 'Complete' : 'Incomplete';
+          item.totalRecords = recordsCount;
+          item.validRecords = validData;
+          item.errorRecords = recordsCount - validData;
+          item.errorCountbyColumn = errorCount;
+          item.status = recordsCount === validData ? 'Complete' : 'Incomplete';
         }
 
         res.send(results);
       } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: 'failed to load data' });
+        console.error('Error in GET:', err.message);
+        res.status(500).json({ error: 'Failed to load data' });
       }
+      break;
+
     case 'DELETE':
       try {
         const { importId, collection_name } = req.body;
 
-        // Delete from templates collection
         await db.collection('templates').deleteOne({ _id: new ObjectId(importId) });
 
-        // Delete the data collection if it exists
         if (collection_name) {
           try {
             await db.collection(collection_name).drop();
           } catch (err) {
-            // Collection might not exist, that's ok
             console.log('Collection drop failed (might not exist):', err.message);
           }
         }
 
-        // Clean up importer record
         await db.collection('importers').deleteMany({
           $or: [
             { templateId: importId },
-            { templateId: new ObjectId(importId) }
-          ]
+            { templateId: new ObjectId(importId) },
+          ],
         });
 
         res.json({ success: true });
@@ -98,6 +104,9 @@ export default async function fetchTemplateRecords(req, res) {
         res.status(500).json({ error: 'Failed to delete import' });
       }
       break;
-  }
 
+    default:
+      res.status(405).json({ error: 'Method not allowed' });
+      break;
+  }
 }

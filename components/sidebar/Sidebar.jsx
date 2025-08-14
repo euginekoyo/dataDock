@@ -10,7 +10,7 @@ import classNames from 'classnames';
 const menuItems = [
     {
         id: 0,
-        label: 'Home',
+        label: 'Dashboard',
         icon: Home,
         link: '/',
         permission: 'view_dashboard',
@@ -64,7 +64,7 @@ const PageLoader = ({ isVisible, message = "Signing out..." }) => {
     if (!isVisible) return null;
 
     return (
-        <div className="fixed inset-0 z-25 flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
             {/* Animated background particles */}
             <div className="absolute inset-0 overflow-hidden">
                 <div className="absolute w-96 h-96 -top-48 -left-48 bg-purple-500/20 rounded-full blur-3xl animate-pulse"></div>
@@ -290,7 +290,7 @@ const Sidebar = ({ onToggle }) => {
                         })}
                     >
                         <div className="relative group">
-                            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
+                            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300 group-hover:scale-110">
                                 <span className="text-white font-bold text-lg">L</span>
                                 <div className="absolute inset-0 bg-white/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                             </div>

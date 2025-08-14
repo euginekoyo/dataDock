@@ -68,7 +68,7 @@ const Layout = ({ children }) => {
                 </header> */}
 
                 {/* Main content */}
-                <main className="flex-1 p-4">
+                <main className="flex-1 p-6 ml-4">
                     <div>
                         {children}
                     </div>
