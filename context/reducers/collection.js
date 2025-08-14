@@ -8,6 +8,10 @@ export function collection(state, action) {
       return { ...state, isTemplateEditing: action.payload };
     case 'SET_CUR_TEMPLATE_EDIT_COLUMN':
       return { ...state, templateColumnToEdit: action.payload };
+    case 'SET_WORKSPACE_NAME':
+      return { ...state, workspaceName: action.payload };
+    case 'SET_ORG_NAME':
+      return { ...state, orgName: action.payload };
     default:
       return state;
   }

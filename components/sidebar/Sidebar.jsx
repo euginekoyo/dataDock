@@ -58,7 +58,6 @@ const Sidebar = ({ onToggle }) => {
                 setFilteredMenuItems([]);
                 return;
             }
-            console.log('User role:', user.role, 'Permissions:', user.permissions);
             let redirectTo = null;
 
             // Precompute all permission checks

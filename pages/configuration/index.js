@@ -13,7 +13,6 @@ const Configuration = () => {
     axios
         .get('/api/importer')
         .then((res) => {
-          console.log(res.data);
           setConfigList(res.data);
         })
         .catch((e) => console.log(e));

@@ -1,47 +1,44 @@
 import React from 'react';
+
 export default function SuccessModal({ isVisible, setIsVisible }) {
   return (
-    <>
-      {isVisible && (
-        <div className="justify-center items-center flex overflow-x-hidden fixed inset-0 z-50 outline-none focus:outline-none">
-          <div className="relative w-96 h-100-px my-6 mx-auto">
-            {/*content*/}
-            <div className="border-0 rounded-lg shadow-lg relative flex flex-col w-full h-full bg-white outline-none focus:outline-none">
-              <div className="flex flex-col p-5">
-                <div className="flex flex-col gap-2 items-center h-50 justify-center text-lg text-blue-700">
+      <>
+        {isVisible && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+              <div className="relative w-full max-w-md p-6 mx-4 bg-white rounded-lg shadow-xl">
+                <div className="flex flex-col items-center gap-4">
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1.5"
-                    stroke="currentColor"
-                    className="w-6 h-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth="2"
+                      stroke="currentColor"
+                      className="w-12 h-12 text-green-600"
+                      aria-hidden="true"
                   >
                     <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.581-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <div className="text-lg font-semibold leading-tight text-blue-700 mb-1">
-                    Yay, You did it!
-                  </div>
-                  <p className="text-sm text-center font-normal leading-tight text-gray-800 mb-10">
-                    You have successfully fixed all the errors. You can proceed
-                    to submit the csv.
+                  <h2 className="text-xl font-semibold text-gray-900">
+                    Success!
+                  </h2>
+                  <p className="text-sm text-center text-gray-600">
+                    All errors have been resolved successfully. You may now proceed to submit the CSV file.
                   </p>
+                  <button
+                      onClick={() => setIsVisible(false)}
+                      className="px-4 py-2 mt-4 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+                      aria-label="Close success modal"
+                  >
+                    OK
+                  </button>
                 </div>
-                <button
-                  onClick={() => setIsVisible(false)}
-                  className="bg-transparent h-8 w-1/4 text-sm hover:bg-blue-500 text-blue-700 font-semibold hover:text-white   border border-blue-500 hover:border-transparent rounded mx-auto"
-                >
-                  OK
-                </button>
               </div>
             </div>
-          </div>
-        </div>
-      )}
-    </>
+        )}
+      </>
   );
 }
