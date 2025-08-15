@@ -51,7 +51,7 @@ function App() {
         <br />
         <YoButton
             importId="Generated when saving importer"
-            yoHostUrl={"http://localhost:5050"}
+            yoHostUrl={\`${process.env.NEXT_PUBLIC_API_URL}\`}
         />
     </div>
     );
@@ -106,7 +106,7 @@ function App() {
         <YoButton
             importId="${configurationData.importerId}"
             templateId="${configurationData.templateId}"  
-            yoHostUrl={"http://localhost:5050"}
+            yoHostUrl={\`${process.env.NEXT_PUBLIC_API_URL}\`}
         />
     </div>
     );

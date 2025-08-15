@@ -21,7 +21,7 @@ services:
       MONGODB_URI: mongodb://database:27017/DataDock
       DATABASE_NAME: 'DataDock'
       OPENAI_SECRET_KEY: your-openai-secret-key
-      BACKEND_SERVER_HOST: 'http://172.17.0.1'  # or use nginx reverse proxy
+      NEXT_PUBLIC_API_URL: 'http://172.17.0.1'  # or use nginx reverse proxy
     depends_on:
       - database
     networks:

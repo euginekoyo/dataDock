@@ -37,7 +37,7 @@ export default authMiddleware(roleMiddleware('manage_users')(async function hand
             expiresIn: '1h',
         });
 
-        await sendWelcomeEmail(user, `http://localhost:5050/login?token=${tempToken}`);
+        await sendWelcomeEmail(user, `${process.env.NEXT_PUBLIC_API_URL}/login?token=${tempToken}`);
 
         return res.status(201).json({ ...user, _id: result.insertedId, tempToken });
     } catch (error) {

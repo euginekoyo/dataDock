@@ -11,7 +11,7 @@
       "name": "Next.js: debug client-side",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:5050"
+      "url": "http://153.92.211.110:5050"
     },
     {
       "name": "Next.js: debug full stack",

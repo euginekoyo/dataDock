@@ -23,7 +23,7 @@ services:
     environment:
       - MONGODB_URI
       - DATABASE_NAME
-      - BACKEND_SERVER_HOST
+      - NEXT_PUBLIC_API_URL
       - OPENAI_SECRET_KEY
       - NEXT_PUBLIC_HIDE_AI
       - NEXT_PUBLIC_HIDE_UPLOADER_BUTTONS
