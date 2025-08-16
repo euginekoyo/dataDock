@@ -190,7 +190,7 @@ export default App;`);
         <div className="rounded-lg min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
           {/* Header */}
           <div className="sticky top-0 z-10 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700">
-            <div className="max-w-7xl mx-auto px-6 py-4">
+            <div className="w-full mx-auto px-6 py-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Link href="/configuration">
@@ -219,7 +219,7 @@ export default App;`);
           </div>
 
           {/* Main Content */}
-          <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="w-full mx-auto px-6 py-8">
             {isVisible && (
                 <SuccessModal
                     submit={acknowledgeModal}
@@ -269,7 +269,7 @@ export default App;`);
                 </div>
 
                 {/* Attach Components */}
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
+                <div className="bg-white/70 w-full dark:bg-gray-800/70 backdrop-blur-sm rounded-2xl p-6 shadow-xl border border-gray-200/50 dark:border-gray-700/50">
                   <AttachToImporter
                       attachToImporters={attachToImporters}
                       setAttachToImporters={setAttachToImporters}

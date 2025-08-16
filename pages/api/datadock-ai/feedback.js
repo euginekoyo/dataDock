@@ -1,51 +1,32 @@
+
 import { getAIResponseWithFallback } from '../../../lib/gpt-engine';
 import clientPromise from '../../../lib/mongodb';
 
-// Helper function to clean and parse JSON response
 function parseAIResponse(response) {
-  // Handle error responses from AI provider fallback
-  let parsedResponse;
   try {
-    parsedResponse = JSON.parse(response);
+    let parsedResponse = JSON.parse(response);
     if (parsedResponse.error) {
       throw new Error(`AI Provider Error: ${parsedResponse.error}`);
     }
+    if (parsedResponse.regex) {
+      parsedResponse = parsedResponse.regex;
+      if (typeof parsedResponse === 'string') {
+        parsedResponse = JSON.parse(parsedResponse);
+      }
+    }
+    return parsedResponse;
   } catch (e) {
-    // If it's not a JSON error response, continue with parsing
+    console.error('parseAIResponse failed:', e.message, 'Raw response:', response.substring(0, 500) + '...');
     if (e.message.includes('AI Provider Error')) {
       throw e;
     }
-  }
-
-  try {
-    // First try to parse directly
-    let parsedResp = JSON.parse(response);
-
-    // If it's wrapped in a regex object, extract the content
-    if (parsedResp.regex) {
-      parsedResp = parsedResp.regex;
-      // If it's a string, parse it again
-      if (typeof parsedResp === 'string') {
-        parsedResp = JSON.parse(parsedResp);
-      }
-    }
-
-    return parsedResp;
-  } catch (error) {
-    console.log('Direct parsing failed, trying cleanup...');
-
-    // Handle the specific case from your logs where objects are comma-separated
-    // but not wrapped in array brackets
     return parseCommaDelimitedObjects(response);
   }
 }
 
-// Specific function to handle comma-delimited JSON objects
 function parseCommaDelimitedObjects(response) {
   try {
     let cleanedResponse = response.trim();
-
-    // If wrapped in regex object as string, extract it
     const regexMatch = response.match(/"regex":\s*"([^"]+)"/);
     if (regexMatch) {
       cleanedResponse = regexMatch[1]
@@ -54,7 +35,6 @@ function parseCommaDelimitedObjects(response) {
           .replace(/\\\\/g, '\\');
     }
 
-    // Look for array pattern first
     const arrayMatch = cleanedResponse.match(/\[[\s\S]*\]/);
     if (arrayMatch) {
       try {
@@ -64,45 +44,32 @@ function parseCommaDelimitedObjects(response) {
       }
     }
 
-    // Handle the case where we have comma-separated objects without array brackets
     if (cleanedResponse.includes('"_id"') && cleanedResponse.includes('},{')) {
       try {
-        // Add array brackets
         let fixedResponse = cleanedResponse.trim();
-
-        // Remove any trailing comma
         fixedResponse = fixedResponse.replace(/,\s*$/, '');
-
-        // Wrap in array brackets
         if (!fixedResponse.startsWith('[')) {
           fixedResponse = '[' + fixedResponse;
         }
         if (!fixedResponse.endsWith(']')) {
           fixedResponse = fixedResponse + ']';
         }
-
-        // Clean up any malformed commas
         fixedResponse = fixedResponse.replace(/,(\s*[}\]])/g, '$1');
-
         console.log('Attempting to parse fixed response...');
         const parsed = JSON.parse(fixedResponse);
         console.log('Successfully parsed comma-delimited objects');
         return parsed;
       } catch (e) {
         console.log('Format fixing failed:', e.message);
-        console.log('Attempted to fix:', fixedResponse?.substring(0, 200) + '...');
       }
     }
 
-    // Last resort: try to extract individual objects manually
     return extractIndividualObjects(cleanedResponse);
-
   } catch (error) {
     throw new Error(`Unable to parse AI response: ${error.message}`);
   }
 }
 
-// Fallback to manually extract objects
 function extractIndividualObjects(text) {
   const objects = [];
   const objectRegex = /\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g;
@@ -111,11 +78,10 @@ function extractIndividualObjects(text) {
   while ((match = objectRegex.exec(text)) !== null) {
     try {
       const obj = JSON.parse(match[0]);
-      if (obj._id) { // Only include objects that look like our data
+      if (obj._id) {
         objects.push(obj);
       }
     } catch (e) {
-      // Skip malformed objects
       continue;
     }
   }
@@ -128,12 +94,9 @@ function extractIndividualObjects(text) {
   throw new Error('No valid JSON objects found in response');
 }
 
-// Manual extraction as last resort
 function extractFeedbackFromRawResponse(rawResponse, originalData) {
   try {
     console.log('Attempting manual extraction from raw response...');
-
-    // Look for patterns like "_id": "6895e5a4022c42cf3d5d64a0"
     const idRegex = /"_id":\s*"([^"]+)"/g;
     const feedbackRegex = /"feedback":\s*({[^}]*(?:{[^}]*}[^}]*)*})/g;
 
@@ -141,31 +104,23 @@ function extractFeedbackFromRawResponse(rawResponse, originalData) {
     const ids = [];
     let idMatch;
 
-    // Extract all IDs first
     while ((idMatch = idRegex.exec(rawResponse)) !== null) {
       ids.push(idMatch[1]);
     }
 
-    // Reset regex
     idRegex.lastIndex = 0;
     feedbackRegex.lastIndex = 0;
 
-    // Try to match IDs with their feedback objects
     const chunks = rawResponse.split('"_id":');
-
     for (let i = 1; i < chunks.length; i++) {
       try {
         const chunk = '"_id":' + chunks[i];
         const idMatch = chunk.match(/"_id":\s*"([^"]+)"/);
-
         if (idMatch) {
           const id = idMatch[1];
           const originalItem = originalData.find(item => item._id === id);
-
           if (originalItem) {
-            // Look for feedback object in this chunk
             const feedbackMatch = chunk.match(/"feedback":\s*({[^}]*(?:{[^}]*}[^}]*)*})/);
-
             let feedback = {};
             if (feedbackMatch) {
               try {
@@ -174,11 +129,7 @@ function extractFeedbackFromRawResponse(rawResponse, originalData) {
                 console.log(`Failed to parse feedback for ${id}:`, e.message);
               }
             }
-
-            result[id] = {
-              ...originalItem,
-              feedback
-            };
+            result[id] = { ...originalItem, feedback };
           }
         }
       } catch (e) {
@@ -189,7 +140,6 @@ function extractFeedbackFromRawResponse(rawResponse, originalData) {
 
     console.log(`Manual extraction completed, found ${Object.keys(result).length} items`);
     return Object.keys(result).length > 0 ? result : null;
-
   } catch (error) {
     console.error('Manual extraction failed completely:', error.message);
     return null;
@@ -197,14 +147,50 @@ function extractFeedbackFromRawResponse(rawResponse, originalData) {
 }
 
 export default async function feedback(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+
   const queryParams = req.query;
   const { columnName, columnValue, collection } = queryParams;
+  console.log('GET request received:', { columnName, columnValue, collection });
+
   const client = await clientPromise;
   const db = client.db(process.env.DATABASE_NAME || 'DataDock');
 
   switch (req.method) {
     case 'GET':
       try {
+        if (!columnName || !columnValue) {
+          console.log('Missing columnName or columnValue, falling back to collection processing');
+          if (!collection) {
+            return res.json({ status: 400, data: { error: 'Missing required parameters: columnName, columnValue, or collection' } });
+          }
+        }
+
+        if (columnName && columnValue) {
+          const actualPrompt = `You are a data validation expert. Analyze the value "${columnValue}" for the field "${columnName}".
+
+          Return feedback as a JSON object describing any issues found.
+
+          Validation checks:
+          - Required fields not empty
+          - Email format validation
+          - Age should be numeric and reasonable (16-100)
+          - Date formats should be consistent (YYYY-MM-DD)
+          - Salary should be numeric
+          - Names should be properly formatted
+
+          Return format: {"${columnName}": "issue description"}
+
+          IMPORTANT: Return only valid JSON object, no additional text.`;
+
+          console.log('Calling AI for single field validation:', { columnName, columnValue });
+          let resp = await getAIResponseWithFallback(actualPrompt, 1000, 0.3, 'feedback');
+          console.log('Raw AI response for single field:', resp);
+          let parsedResp = parseAIResponse(resp);
+          return res.json({ status: 200, data: parsedResp });
+        }
+
         const rows = await db
             .collection(collection)
             .find()
@@ -218,51 +204,44 @@ export default async function feedback(req, res) {
           return x;
         });
 
-        // Enhanced prompt with clearer instructions
         let actualPrompt = `You are a data validation expert. Analyze the following array of employee data objects and identify data quality issues.
 
-For each object, add a "feedback" property containing validation feedback for problematic fields. Return ONLY a valid JSON array (wrapped in square brackets).
+        For each object, add a "feedback" property containing validation feedback for problematic fields. Return ONLY a valid JSON array (wrapped in square brackets).
 
-Validation rules to check:
-- Age: Must be a number between 16-100
-- Full Name: Should be trimmed, properly capitalized
-- Email: Must be valid format and trimmed
-- DoB: Must be in YYYY-MM-DD format
-- Salary: Must be a number (not text)
-- Department: Required field, not empty
-- Emp ID: Required field, must be unique
+        Validation rules to check:
+        - Age: Must be a number between 16-100
+        - Full Name: Should be trimmed, properly capitalized
+        - Email: Must be valid format and trimmed
+        - DoB: Must be in YYYY-MM-DD format
+        - Salary: Must be a number (not text)
+        - Department: Required field, not empty
+        - Emp ID: Required field, must be unique
 
-Input data:
-${JSON.stringify(parsedRows, null, 2)}
+        Input data:
+        ${JSON.stringify(parsedRows, null, 2)}
 
-Return format: [{"_id": "...", "Emp ID": 101, "feedback": {...}}, {...}]
+        Return format: [{"_id": "...", "Emp ID": 101, "feedback": {...}}, {...}]
 
-IMPORTANT: Return only the JSON array, no additional text or formatting.`;
+        IMPORTANT: Return only the JSON array, no additional text or formatting.`;
 
         console.log('Calling AI for data validation feedback');
         let resp = await getAIResponseWithFallback(actualPrompt, 3000, 0.3, 'feedback');
-        // console.log('Raw AI Response:', resp);
+        console.log('Raw AI Response:', resp);
 
         try {
-          // Check if we got an error response from AI providers
           let errorCheck;
           try {
             errorCheck = JSON.parse(resp);
             if (errorCheck.error) {
               throw new Error(`AI providers failed: ${errorCheck.error}`);
             }
-          } catch (e) {
-            // Not an error response, continue with normal parsing
-          }
+          } catch (e) {}
 
           let parsedResp = parseAIResponse(resp);
-
-          // Ensure we have an array
           if (!Array.isArray(parsedResp)) {
             throw new Error('Response is not an array');
           }
 
-          // Build result object keyed by _id
           let rv = {};
           for (const item of parsedResp) {
             if (item._id) {
@@ -272,16 +251,12 @@ IMPORTANT: Return only the JSON array, no additional text or formatting.`;
 
           console.log(`Successfully parsed feedback data for ${Object.keys(rv).length} items`);
           res.json({ status: 200, data: rv });
-
         } catch (parseError) {
           console.error('Failed to parse AI response:', parseError.message);
           console.error('Raw response was:', resp.substring(0, 500) + '...');
 
-          // Enhanced fallback: try manual parsing one more time
           let fallbackRv = {};
-
           try {
-            // Try to extract at least some feedback from the malformed response
             const manualObjects = extractFeedbackFromRawResponse(resp, parsedRows);
             if (manualObjects && Object.keys(manualObjects).length > 0) {
               console.log('Manual extraction succeeded, using partial results');
@@ -296,7 +271,6 @@ IMPORTANT: Return only the JSON array, no additional text or formatting.`;
             console.log('Manual extraction also failed:', e.message);
           }
 
-          // Final fallback: return original data with empty feedback
           for (const item of parsedRows) {
             fallbackRv[item._id] = { ...item, feedback: {} };
           }
@@ -316,24 +290,25 @@ IMPORTANT: Return only the JSON array, no additional text or formatting.`;
       try {
         let csvPrompt = `You are a data validation expert. Analyze the following JSON data for validation issues.
 
-Return feedback as a JSON object where each key corresponds to a field name and the value describes any issues found.
+        Return feedback as a JSON object where each key corresponds to a field name and the value describes any issues found.
 
-Validation checks:
-- Required fields not empty
-- Email format validation
-- Age should be numeric and reasonable (16-100)
-- Date formats should be consistent
-- Salary should be numeric
-- Names should be properly formatted
+        Validation checks:
+        - Required fields not empty
+        - Email format validation
+        - Age should be numeric and reasonable (16-100)
+        - Date formats should be consistent
+        - Salary should be numeric
+        - Names should be properly formatted
 
-Data to analyze:
-${JSON.stringify(req.body, null, 2)}
+        Data to analyze:
+        ${JSON.stringify(req.body, null, 2)}
 
-Return format: {"fieldName": "issue description", "anotherField": "another issue"}
+        Return format: {"fieldName": "issue description", "anotherField": "another issue"}
 
-IMPORTANT: Return only valid JSON object, no additional text.`;
+        IMPORTANT: Return only valid JSON object, no additional text.`;
 
-        let csvresp = await getAIResponseWithFallback(csvPrompt, 1500, 0.3, 'regex');
+        console.log('Calling AI for POST feedback');
+        let csvresp = await getAIResponseWithFallback(csvPrompt, 1500, 0.3, 'feedback');
         console.log('Raw CSV feedback response:', csvresp);
 
         try {

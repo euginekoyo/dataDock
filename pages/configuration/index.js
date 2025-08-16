@@ -44,7 +44,7 @@ const Configuration = () => {
 
   return (
       <Layout>
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 ml-10">
           {/* Delete Confirmation Modal */}
           <dialog id="confirmDeleteModal" className="modal modal-bottom sm:modal-middle">
             <div className="modal-box bg-white rounded-lg p-4 shadow-sm border border-gray-100">

@@ -40,7 +40,7 @@ const Templates = () => {
     <>
       <ToastContainer />
       <Layout>
-        <div className="p-2 dark:bg-gray-800 h-full">
+        <div className="p-2 ml-8 dark:bg-gray-800 h-full">
           <Tab.Group
             defaultIndex={defaultTab}
             selectedIndex={defaultTab}

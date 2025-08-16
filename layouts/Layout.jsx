@@ -29,13 +29,13 @@ const Layout = ({ children }) => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 relative z-0"> {/* Reset stacking context */}
+        <div className=" bg-gradient-to-br from-blue-50 via-white to-blue-50 relative z-0"> {/* Reset stacking context */}
             <Sidebar onToggle={handleSidebarToggle} />
 
             {/* Main content area with dynamic margin and baseline z-index */}
             <div
                 className={`min-h-screen transition-all duration-200 ${
-                    isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-14' : 'ml-56'
+                    isMobile ? 'ml-0' : sidebarCollapsed ? 'ml-14' : 'ml-48'
                 } z-0`} // Baseline z-index
             >
                 {/* Top header bar */}
@@ -68,7 +68,7 @@ const Layout = ({ children }) => {
                 </header> */}
 
                 {/* Main content */}
-                <main className="flex-1 p-6 ml-4">
+                <main className="flex-1">
                     <div>
                         {children}
                     </div>

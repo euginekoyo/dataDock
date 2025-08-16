@@ -283,7 +283,7 @@ export default function Dashboard() {
     return (
         <Layout>
             <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-                <div className="p-6 max-w-5xl mx-auto">
+                <div className="p-6 w-full mx-auto">
                     <WelcomeSection />
                     {/* Navigation Tabs */}
                     {navigationTabs.length > 0 && (

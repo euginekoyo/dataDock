@@ -99,7 +99,7 @@ const Sidebar = ({ onToggle }) => {
     );
 
     const sidebarClasses = classNames(
-        'fixed left-0 top-0 h-screen flex flex-col transition-all duration-200 bg-gray-50 border-r border-gray-100 shadow-sm z-10',
+        'fixed left-0 top-0 h-screen flex flex-col transition-all duration-200 bg-gray-50 border-r border-gray-100 shadow-sm z-[-1]',
         { 'w-56': !toggleCollapse, 'w-14': toggleCollapse }
     );
 
@@ -179,7 +179,7 @@ const Sidebar = ({ onToggle }) => {
 
             <div className={overlayClasses} onClick={handleOverlayClick} />
 
-            <aside className={sidebarClasses} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+            <aside className={sidebarClasses} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} >
                 {/* Header */}
                 <div className="p-4 border-b border-gray-100 bg-white">
                     <div className={classNames('flex items-center', { 'justify-center': toggleCollapse, 'justify-start': !toggleCollapse })}>

@@ -28,7 +28,9 @@ const nextConfig = {
   //   return config;
   // },
   env: {
-    NEXT_PUBLIC_API_URL: 'http://153.92.211.110:5050',
+    NEXT_PUBLIC_API_URL: 'http://localhost:5050',
+    // NEXT_PUBLIC_API_URL: 'http://153.92.211.110:505:5050',
+
   },
 };
 
